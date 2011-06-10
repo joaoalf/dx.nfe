@@ -1,0 +1,33 @@
+# -*- coding: utf-8 -*-
+
+
+class DX_NFE(object):
+    """Main Class"""
+
+    def __init__(self, directory, cert, mode, nfe, xml, danfe, key):
+        self.directory = directory
+        self.cert = cert
+        self.modo = modo
+        self.nfe = nfe
+        self.xml = xml
+        self.danfe = danfe
+        self.key = key
+
+    def main(self):
+        if modo == 'EMISSAO':
+            handle = emissor.Emissor(self.nfe, self.emissor, self.xml, self.danfe)
+            try:
+                handle.run()
+            except:
+                sys.return(-1)
+        elif modo == 'STATUSE':
+            pass
+        elif modo == 'STATUSS':
+            pass
+        elif modo == 'CANCELAMENTO':
+            pass
+        elif modo == 'INUTILIZACAO':
+            pass
+            
+if __name__ == '__main__':
+    

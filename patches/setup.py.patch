@@ -1,0 +1,19 @@
+diff -Nrau PySPED.orig/setup.py PySPED/setup.py
+--- PySPED.orig/setup.py	1969-12-31 21:00:00.000000000 -0300
++++ PySPED/setup.py	2011-05-16 23:18:11.000000000 -0300
+@@ -0,0 +1,15 @@
++# -*- coding: utf-8 -*-
++from setuptools import setup, find_packages
++import os
++
++setup(
++    name=u'PySPED', 
++    package_dir={'': 'pysped'},
++    packages=find_packages('pysped'), 
++    include_package_data=True,
++    install_requires=['setuptools',
++                      'lxml',
++                      'PyXMLSec',
++                      'reportlab',
++                      'Geraldo'],
++

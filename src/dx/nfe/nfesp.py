@@ -1,0 +1,484 @@
+# -*- coding: utf-8 -*-
+from zope.interface import implements
+from zope.component import adapts
+from interfaces import INFeXml, INFeInput
+    
+class NFeSP(object):
+    implements(INFeDataSource)
+    adapts(NFeXML)
+    
+    def __init__(self, dsn):
+        self.dsn = dsn
+        self.txt = None
+
+    def connect(self):
+        try:
+            self.txt = file(self.dsn.replace('file://', ''))
+        except OSError, e:
+            print e
+            raise
+
+    def load(self):
+        n = []
+        i = -1
+        for line in self.txt.split('|'):
+            grupo = line.pop()
+            if grupo == 'NOTA FISCAL':
+                num = int(line.pop())
+            elif grupo == 'A':
+                versao = line.pop()
+                if versao == '1.10':
+                    NFe = NFe_110
+                elif versao == '2.00':
+                    NFe = NFe_200
+                else:
+                    NFe = None
+                n.append(NFe())
+            elif grupo == 'B':
+                #
+                # Identificação da NF-e
+                #
+                n[i].infNFe.ide.cUF.valor     = line.pop()
+                n[i].infNFe.ide.cNF.valor     = line.pop()
+                n[i].infNFe.ide.natOp.valor   = line.pop()
+                n[i].infNFe.ide.indPag.valor  = line.pop()
+                n[i].infNFe.ide.mod.valor     = line.pop()
+                n[i].infNFe.ide.serie.valor   = line.pop()
+                n[i].infNFe.ide.nNF.valor     = line.pop()
+                data = line.pop()
+                n[i].infNFe.ide.dEmi.valor    = datetime(data[:4],
+                                                      data[5:7],
+                                                      data[8:10])
+                data = line.pop()
+                n[i].infNFe.ide.dSaiEnt.valor = datetime(data[:4],
+                                                      data[5:7],
+                                                      data[8:10])
+                n[i].infNFe.ide.tpNF.valor    = line.pop()         
+                n[i].infNFe.ide.cMunFG.valor  = line.pop()
+                n[i].infNFe.ide.tpImp.valor   = line.pop()
+                n[i].infNFe.ide.tpEmis.valor  = line.pop()
+                n[i].infNFe.ide.CDV.valor     = line.pop()
+                n[i].infNFe.ide.tpAmb         = line.pop()
+                #n[i].infNFe.ide.indPag.valor  = line.pop()
+                n[i].infNFe.ide.finNFe.valor  = line.pop()
+                n[i].infNFe.ide.procEmi.valor = line.pop()
+                n[i].infNFe.ide.verProc.valor = line.pop()
+            elif grupo == 'C':
+                #
+                # Emitente
+                #
+                n[i].infNFe.emit.xNome.valor = line.pop()
+                n[i].infNFe.emit.xFant.valor = line.pop()
+                n[i].infNFe.emit.IE.valor    = line.pop()
+                n[i].infNFe.emit.IEST.valor  = line.pop()
+                n[i].infNFe.emit.IM.valor    = line.pop()
+                n[i].infNFe.emit.CNAE.valor  = line.pop()
+            elif grupo == 'C02':
+                n[i].infNFe.emit.CNPJ.valor  = line.pop()
+            elif grupo == 'C02a':
+                n[i].infNFe.emit.CNPJ.valor  = line.pop()
+            elif grupo == 'C05':
+                n[i].infNFe.emit.enderEmit.xLgr.valor    = line.pop()
+                n[i].infNFe.emit.enderEmit.nro.valor     = line.pop()
+                n[i].infNFe.emit.enderEmit.xCpl.valor    = line.pop()
+                n[i].infNFe.emit.enderEmit.xBairro.valor = line.pop()
+                n[i].infNFe.emit.enderEmit.cMun.valor    = line.pop()
+                n[i].infNFe.emit.enderEmit.xMun.valor    = line.pop()
+                n[i].infNFe.emit.enderEmit.UF.valor      = line.pop()
+                n[i].infNFe.emit.enderEmit.CEP.valor     = line.pop()
+                n[i].infNFe.emit.enderEmit.cPais.valor   = line.pop()
+                n[i].infNFe.emit.enderEmit.xPais.valor   = line.pop()
+                n[i].infNFe.emit.enderEmit.fone.valor    = line.pop()
+            elif grupo == 'D':
+                raise GroupNotImplementd(grupo)
+                #
+                # Regime tributário
+                # 
+                #n[i].infNFe.emit.CRT.valor = 3
+            elif grupo == 'E':
+                #
+                # Destinatário
+                #
+                n[i].infNFe.dest.xNome.valor = line.pop()
+                n[i].infNFe.dest.IE.valor    = line.pop()
+                n[i].infNFe.dest.ISUF.valor  = line.pop()
+            elif grupo == 'E02':
+                n[i].infNFe.dest.CNPJ.valor  = line.pop()
+            elif grupo == 'E03':
+                n[i].infNFe.dest.CPF.valor   = line.pop()
+            elif grupo == 'E05':
+                n[i].infNFe.dest.enderDest.xLgr.valor    = line.pop()
+                n[i].infNFe.dest.enderDest.nro.valor     = line.pop()
+                n[i].infNFe.dest.enderDest.xCpl.valor    = line.pop()
+                n[i].infNFe.dest.enderDest.xBairro.valor = line.pop()
+                n[i].infNFe.dest.enderDest.cMun.valor    = line.pop()
+                n[i].infNFe.dest.enderDest.xMun.valor    = line.pop()
+                n[i].infNFe.dest.enderDest.UF.valor      = line.pop()
+                n[i].infNFe.dest.enderDest.CEP.valor     = line.pop()
+                n[i].infNFe.dest.enderDest.cPais.valor   = line.pop()
+                n[i].infNFe.dest.enderDest.xPais.valor   = line.pop()
+                n[i].infNFe.dest.enderDest.fone.valor    = line.pop()
+                #
+                # Emeio
+                #
+                #n[i].infNFe.dest.email.valor = u'emeio@servidor.com.br'
+            elif grupo == 'F':
+                n[i].infNFe.retirada.enderDest.CNPJ.valor    = line.pop()
+                n[i].infNFe.retirada.enderDest.xLgr.valor    = line.pop()
+                n[i].infNFe.retirada.enderDest.nro.valor     = line.pop()
+                n[i].infNFe.retirada.enderDest.xCpl.valor    = line.pop()
+                n[i].infNFe.retirada.enderDest.xBairro.valor = line.pop()
+                n[i].infNFe.retirada.enderDest.cMun.valor    = line.pop()
+                n[i].infNFe.retirada.enderDest.xMun.valor    = line.pop()
+                n[i].infNFe.retirada.enderDest.UF.valor      = line.pop()
+            elif grupo == 'G':
+                n[i].infNFe.entrega.enderDest.CNPJ.valor    = line.pop()
+                n[i].infNFe.entrega.enderDest.xLgr.valor    = line.pop()
+                n[i].infNFe.entrega.enderDest.nro.valor     = line.pop()
+                n[i].infNFe.entrega.enderDest.xCpl.valor    = line.pop()
+                n[i].infNFe.entrega.enderDest.xBairro.valor = line.pop()
+                n[i].infNFe.entrega.enderDest.cMun.valor    = line.pop()
+                n[i].infNFe.entrega.enderDest.xMun.valor    = line.pop()
+                n[i].infNFe.entrega.enderDest.UF.valor      = line.pop()
+            elif grupo == 'H':
+                #grupo = linha.pop()
+                #
+                # Detalhe
+                #
+                d1 = Det_200()
+                d1.nItem.valor = line.pop()
+                d1.infAdProd   = linha.pop()
+            elif grupo == 'I':
+                d1.prod.cProd.valor    = line.pop()
+                d1.prod.cEAN.valor     = line.pop()
+                d1.prod.xProd.valor    = line.pop()
+                d1.prod.NCM.valor      = line.pop()
+                d1.prod.EXTIPI.valor   = line.pop()
+                d1.prod.genero.valor   = line.pop()
+                d1.prod.CFOP.valor     = line.pop()
+                d1.prod.uCom.valor     = line.pop()
+                d1.prod.qCom.valor     = line.pop()
+                d1.prod.vUnCom.valor   = line.pop()
+                d1.prod.vProd.valor    = line.pop()
+                d1.prod.cEANTrib.valor = line.pop()
+                d1.prod.uTrib.valor    = line.pop()
+                d1.prod.qTrib.valor    = line.pop()
+                d1.prod.vUnTrib.valor  = line.pop()
+                d1.prod.vFrete.valor   = line.pop()
+                d1.prod.vSeg.valor     = line.pop()
+                d1.prod.vDesc.valor    = line.pop()
+                #d1.prod.vOutro.valor   = line.pop()
+                #
+                # Produto entra no total da NF-e
+                #
+                #d1.prod.indTot.valor   = 1
+            elif grupo == 'I18':
+                d1.prod.DI.dDI.valor         = line.pop()
+                d1.prod.DI.xLocDesemb.valor  = line.pop()
+                d1.prod.DI.UFDesemb.valor    = line.pop()
+                d1.prod.DI.dDesemb.valor     = line.pop()
+                d1.prod.DI.cExportador.valor = line.pop()
+                #d1.prod.genero.valor   = line.pop()
+            elif grupo == 'I25':
+                d1.prod.adi.nAdicao.valor     = line.pop()
+                d1.prod.adi.nSeqAdic.valor    = line.pop()
+                d1.prod.adi.cFabricante.valor = line.pop()
+                d1.prod.adi.vDescDI.valor     = line.pop()
+                #d1.prod.adi.cExportador.valor = line.pop()
+            elif grupo == 'J':
+                raise GroupNotImplementd(grupo)
+            elif grupo == 'K':
+                raise GroupNotImplementd(grupo)
+            elif grupo == 'L':
+                raise GroupNotImplementd(grupo)
+            elif grupo == 'L01':
+                raise GroupNotImplementd(grupo)
+            elif grupo == 'L105':
+                raise GroupNotImplementd(grupo)
+            elif grupo == 'L109':
+                raise GroupNotImplementd(grupo)
+            elif grupo == 'L114':
+                raise GroupNotImplementd(grupo)
+            elif grupo == 'L117':
+                raise GroupNotImplementd(grupo)
+            #
+            # Impostos
+            #
+            elif grupo == 'M':
+                pass
+            elif grupo == 'N':
+                pass
+            elif grupo == 'N02':
+                d1.imposto.ICMS.orig.valor  = line.pop()
+                d1.imposto.ICMS.CST.valor   = line.pop()
+                d1.imposto.ICMS.modBC.valor = line.pop()
+                d1.imposto.ICMS.vBC.valor   = line.pop()
+                d1.imposto.ICMS.pICMS.valor = line.pop()
+                d1.imposto.ICMS.vICMS.valor = line.pop()
+            elif grupo == 'N03':
+                d1.imposto.ICMS.orig.valor     = line.pop()
+                d1.imposto.ICMS.CST.valor      = line.pop()
+                d1.imposto.ICMS.modBC.valor    = line.pop()
+                d1.imposto.ICMS.vBC.valor      = line.pop()
+                d1.imposto.ICMS.pICMS.valor    = line.pop()
+                d1.imposto.ICMS.vICMS.valor    = line.pop()
+                d1.imposto.ICMS.modBCST.valor  = line.pop()
+                d1.imposto.ICMS.pMVAST.valor   = line.pop()
+                d1.imposto.ICMS.pRedBSCT.valor = line.pop()
+                d1.imposto.ICMS.vBCST.valor    = line.pop()
+                d1.imposto.ICMS.pICMSST.valor  = line.pop()
+                d1.imposto.ICMS.vICMSST.valor  = line.pop()    
+            elif grupo == 'N04':
+                d1.imposto.ICMS.orig.valor   = line.pop()
+                d1.imposto.ICMS.CST.valor    = line.pop()
+                d1.imposto.ICMS.modBC.valor  = line.pop()
+                d1.imposto.ICMS.pRedBC.valor = line.pop()
+                d1.imposto.ICMS.vBC.valor    = line.pop()
+                d1.imposto.ICMS.pICMS.valor  = line.pop()
+                d1.imposto.ICMS.vICMS.valor  = line.pop()                
+            elif grupo == 'N05':
+                d1.imposto.ICMS.orig.valor     = line.pop()
+                d1.imposto.ICMS.CST.valor      = line.pop()
+                d1.imposto.ICMS.modBCST.valor  = line.pop()
+                d1.imposto.ICMS.pVMAST.valor   = line.pop()
+                d1.imposto.ICMS.pRedBCST.valor = line.pop()
+                d1.imposto.ICMS.vBCST.valor    = line.pop()
+                d1.imposto.ICMS.pICMSST.valor  = line.pop()
+                d1.imposto.ICMS.vICMSST.valor  = line.pop()                
+            elif grupo == 'N06':
+                d1.imposto.ICMS.orig.valor  = line.pop()
+                d1.imposto.ICMS.CST.valor   = line.pop()
+            elif grupo == 'N07':
+                d1.imposto.ICMS.orig.valor   = line.pop()
+                d1.imposto.ICMS.CST.valor    = line.pop()
+                d1.imposto.ICMS.modBC.valor  = line.pop()
+                d1.imposto.ICMS.pRedBC.valor = line.pop()
+                d1.imposto.ICMS.vBC.valor    = line.pop()
+                d1.imposto.ICMS.pICMS.valor  = line.pop()
+                d1.imposto.ICMS.vICMS.valor  = line.pop()                
+            elif grupo == 'N08':
+                d1.imposto.ICMS.orig.valor    = line.pop()
+                d1.imposto.ICMS.CST.valor     = line.pop()
+                d1.imposto.ICMS.vBCST.valor   = line.pop()
+                d1.imposto.ICMS.vICMSST.valor = line.pop()                
+            elif grupo == 'N09':
+                d1.imposto.ICMS.orig.valor     = line.pop()
+                d1.imposto.ICMS.CST.valor      = line.pop()
+                d1.imposto.ICMS.modBC.valor    = line.pop()
+                d1.imposto.ICMS.pRedBC.valor = line.pop()
+                d1.imposto.ICMS.vBC.valor      = line.pop()
+                d1.imposto.ICMS.pICMS.valor    = line.pop()
+                d1.imposto.ICMS.vICMS.valor    = line.pop()
+                d1.imposto.ICMS.modBCST.valor  = line.pop()
+                d1.imposto.ICMS.pMVAST.valor   = line.pop()
+                d1.imposto.ICMS.pRedBCST.valor = line.pop()
+                d1.imposto.ICMS.vBCST.valor    = line.pop()
+                d1.imposto.ICMS.pICMSST.valor  = line.pop()
+                d1.imposto.ICMS.vICMSST.valor  = line.pop()
+            elif grupo == 'N10':
+                d1.imposto.ICMS.orig.valor     = line.pop()
+                d1.imposto.ICMS.CST.valor      = line.pop()
+                d1.imposto.ICMS.modBC.valor    = line.pop()
+                d1.imposto.ICMS.vBC.valor      = line.pop()
+                d1.imposto.ICMS.pRedBC.valor   = line.pop()
+                d1.imposto.ICMS.pICMS.valor    = line.pop()
+                d1.imposto.ICMS.vICMS.valor    = line.pop()
+                d1.imposto.ICMS.modBCST.valor  = line.pop()
+                d1.imposto.ICMS.pMVAST.valor   = line.pop()
+                d1.imposto.ICMS.pRedBCST.valor = line.pop()
+                d1.imposto.ICMS.vBCST.valor    = line.pop()
+                d1.imposto.ICMS.pICMSST.valor  = line.pop()
+                d1.imposto.ICMS.vICMSST.valor  = line.pop()
+            elif grupo == 'O':
+                d1.imposto.IPI.clEnq.valor    = line.pop()
+                d1.imposto.IPI.CNPJProd.valor = line.pop()
+                d1.imposto.IPI.cSelo.valor    = line.pop()
+                d1.imposto.IPI.qSelo.valor    = line.pop()
+                d1.imposto.IPI.cEnq.valor     = line.pop()
+                #d1.imposto.IPI.vIPI.valor   = u'100.00'
+            elif grupo == 'O07':
+                d1.imposto.IPI.CST.valor  = line.pop()
+                d1.imposto.IPI.VIPI.valor = line.pop()
+            elif grupo == 'O08':
+                d1.imposto.IPI.CST.valor = line.pop()
+            elif grupo == 'O10':
+                d1.imposto.IPI.vBC.valor  = line.pop()
+                d1.imposto.IPI.pIPI.valor = line.pop()
+            elif grupo == 'O11':
+                d1.imposto.IPI.qUnid.valor = line.pop()
+                d1.imposto.IPI.vUnid.valor = line.pop()
+            elif grupo == 'P':
+                raise GroupNotImplementd(grupo)
+            elif grupo == 'Q':
+                pass
+            elif grupo == 'Q02':
+                d1.imposto.PIS.CST.valor  = line.pop()
+                d1.imposto.PIS.vBC.valor  = line.pop()
+                d1.imposto.PIS.pPIS.valor = line.pop()
+                d1.imposto.PIS.vPIS.valor = line.pop()
+            elif grupo == 'Q03':
+                d1.imposto.PIS.CST.valor       = line.pop()
+                d1.imposto.PIS.vBCProd.valor   = line.pop()
+                d1.imposto.PIS.pAliqProd.valor = line.pop()
+                d1.imposto.PIS.vPIS.valor      = line.pop()
+            elif grupo == 'Q04':
+                d1.imposto.PIS.CST.valor = line.pop()
+            elif grupo == 'Q05':
+                d1.imposto.PIS.CST.valor  = line.pop()
+                d1.imposto.PIS.vPIS.valor = line.pop()
+            elif grupo == 'Q07':
+                d1.imposto.PIS.vBC.valor  = line.pop()
+                d1.imposto.PIS.pPIS.valor = line.pop()
+            elif grupo == 'Q10':
+                d1.imposto.PIS.qBCProd.valor   = line.pop()
+                d1.imposto.PIS.vAliqProd.valor = line.pop()
+            elif grupo == 'R':
+                d1.imposto.PISST.vPis.valor  = line.pop()
+            elif grupo == 'R02':
+                d1.imposto.PIS.vBC.valor  = line.pop()
+                d1.imposto.PIS.pPIS.valor = line.pop()
+            elif grupo == 'R04':
+                d1.imposto.PIS.qBCProd.valor   = line.pop()
+                d1.imposto.PIS.vAliqProd.valor = line.pop()                
+            elif grupo == 'S':
+                pass
+            elif grupo == 'S02':
+                d1.imposto.COFINS.CST.valor     = line.pop()
+                d1.imposto.COFINS.vBC.valor     = line.pop()
+                d1.imposto.COFINS.pCOFINS.valor = line.pop()
+                d1.imposto.COFINS.vCOFINS.valor = line.pop()
+            elif grupo == 'S03':
+                d1.imposto.COFINS.CST.valor       = line.pop()
+                d1.imposto.COFINS.qBCProd.valor   = line.pop()
+                d1.imposto.COFINS.vAliqProd.valor = line.pop()
+                d1.imposto.COFINS.vCOFINS.valor   = line.pop()
+            elif grupo == 'S04':
+                d1.imposto.COFINS.CST.valor       = line.pop()
+            elif grupo == 'S05':
+                d1.imposto.COFINS.CST.valor       = line.pop()
+                d1.imposto.COFINS.vCOFINS.valor   = line.pop()
+            elif grupo == 'S07':
+                d1.imposto.COFINS.vBC.valor     = line.pop()
+                d1.imposto.COFINS.pCOFINS.valor = line.pop()
+            elif grupo == 'S09':
+                d1.imposto.COFINS.qBCProd.valor   = line.pop()
+                d1.imposto.COFINS.vAliqProd.valor = line.pop()
+            elif grupo == 'T':
+                d1.imposto.COFINSST.vCofins.valor = line.pop()
+            elif grupo == 'T02':
+                d1.imposto.COFINSST.vBC.valor     = line.pop()
+                d1.imposto.COFINSST.pCOFINS.valor = line.pop()
+            elif grupo == 'T04':
+                d1.imposto.COFINSST.qBCProd.valor   = line.pop()
+                d1.imposto.COFINSST.vAliqProd.valor = line.pop()
+            elif grupo == 'U':
+                d1.imposto.ISSQN.vBC.valor       = line.pop()
+                d1.imposto.ISSQN.vAliq.valor     = line.pop()
+                d1.imposto.ISSQN.vISSQN.valor    = line.pop()
+                d1.imposto.ISSQN.cMunFG.valor    = line.pop()
+                d1.imposto.ISSQN.cListServ.valor = line.pop()
+                # Inclui o detalhe na NF-e
+                n[i].infNFe.det.append(d1)
+            elif grupo == 'W':
+                # Totais
+                pass
+            elif grupo == 'W02':
+                n[i].infNFe.total.ICMSTot.vBC.valor     = line.pop()
+                n[i].infNFe.total.ICMSTot.vICMS.valor   = line.pop()
+                n[i].infNFe.total.ICMSTot.vBCST.valor   = line.pop()
+                n[i].infNFe.total.ICMSTot.vST.valor     = line.pop()
+                n[i].infNFe.total.ICMSTot.vProd.valor   = line.pop()
+                n[i].infNFe.total.ICMSTot.vFrete.valor  = line.pop()
+                n[i].infNFe.total.ICMSTot.vSeg.valor    = line.pop()
+                n[i].infNFe.total.ICMSTot.vDesc.valor   = line.pop()
+                n[i].infNFe.total.ICMSTot.vII.valor     = line.pop()
+                n[i].infNFe.total.ICMSTot.vIPI.valor    = line.pop()
+                n[i].infNFe.total.ICMSTot.vPIS.valor    = line.pop()
+                n[i].infNFe.total.ICMSTot.vCOFINS.valor = line.pop()
+                n[i].infNFe.total.ICMSTot.vOutro.valor  = line.pop()
+                n[i].infNFe.total.ICMSTot.vNF.valor     = line.pop()
+            elif grupo == 'W17':
+                n[i].infNFe.total.ISSQNtot.vServ.valor   = line.pop()
+                n[i].infNFe.total.ISSQNtot.vBC.valor     = line.pop()
+                n[i].infNFe.total.ISSQNtot.vISS.valor    = line.pop()
+                n[i].infNFe.total.ISSQNtot.vPIS.valor    = line.pop()
+                n[i].infNFe.total.ISSQNtot.vCOFINS.valor = line.pop()
+            elif grupo == 'W23':
+                n[i].infNFe.total.retTrib.vRetPIS.valor    = line.pop()
+                n[i].infNFe.total.retTrib.vRetCOFINS.valor = line.pop()
+                n[i].infNFe.total.retTrib.vRetCSLL.valor   = line.pop()
+                n[i].infNFe.total.retTrib.vBCIRRF.valor    = line.pop()
+                n[i].infNFe.total.retTrib.vIRRF.valor      = line.pop()
+                n[i].infNFe.total.retTrib.vBCRetPrev.valor = line.pop()
+                n[i].infNFe.total.retTrib.vRetPrev.valor   = line.pop()
+            elif grupo == 'X':
+                n[i].infNFe.transp.modFrete.valor = line.pop()
+            elif grupo == 'X03':
+                n[i].infNFe.transp.transporta.xNome.valor  = line.pop()
+                n[i].infNFe.transp.transporta.IE.valor     = line.pop()
+                n[i].infNFe.transp.transporta.xEnder.valor = line.pop()
+                n[i].infNFe.transp.transporta.UF.valor     = line.pop()
+                n[i].infNFe.transp.transporta.xMun.valor   = line.pop()
+            elif grupo == 'X04':
+                n[i].infNFe.transp.transporta.CNPJ.valor = line.pop()
+            elif grupo == 'X05':
+                n[i].infNFe.transp.transporta.CPF.valor = line.pop()
+            elif grupo == 'X11':
+                n[i].infNFe.transp.retTransp.vServ.valor    = line.pop()
+                n[i].infNFe.transp.retTransp.vBCRet.valor   = line.pop()
+                n[i].infNFe.transp.retTransp.pICMSRet.valor = line.pop()
+                n[i].infNFe.transp.retTransp.vICMSRet.valor = line.pop()
+                n[i].infNFe.transp.retTransp.CFOP.valor     = line.pop()
+                n[i].infNFe.transp.retTransp.cMunFG.valor   = line.pop()
+            elif grupo == 'X18':
+                n[i].infNFe.transp.veicTransp.placa.valor = line.pop()
+                n[i].infNFe.transp.veicTransp.UF.valor    = line.pop()
+                n[i].infNFe.transp.veicTransp.RNTC.valor  = line.pop()
+            elif grupo == 'X22':
+                n[i].infNFe.transp.reboque.placa.valor = line.pop()
+                n[i].infNFe.transp.reboque.UF.valor    = line.pop()
+                n[i].infNFe.transp.reboque.RNTC.valor  = line.pop()
+            elif grupo == 'X26':
+                n[i].infNFe.transp.vol.qVol.valor  = line.pop()
+                n[i].infNFe.transp.vol.esp.valor   = line.pop()
+                n[i].infNFe.transp.vol.marca.valor = line.pop()
+                n[i].infNFe.transp.vol.nVol.valor  = line.pop()
+                n[i].infNFe.transp.vol.pesoL.valor = line.pop()
+                n[i].infNFe.transp.vol.pesoB.valor = line.pop()
+            elif grupo == 'X33':
+                n[i].infNFe.transp.lacres.nLacre.valor  = line.pop()
+            elif grupo == 'Y':
+                pass
+            elif grupo == 'Y02':
+                n[i].infNFe.cobr.nFat.valor  = line.pop()
+                n[i].infNFe.cobr.vOrig.valor = line.pop()
+                n[i].infNFe.cobr.vDesc.valor = line.pop()
+                n[i].infNFe.cobr.vLiq.valor  = line.pop()
+            elif grupo == 'Y07':
+                n[i].infNFe.cobr.nDup.valor  = line.pop()
+                n[i].infNFe.cobr.dVenc.valor = line.pop()
+                n[i].infNFe.cobr.vDup.valor  = line.pop()
+            elif grupo == 'Z':
+                n[i].infNFe.infAdic.infAdFisco.valor = line.pop()                
+                n[i].infNFe.infAdic.infCpl.valor     = line.pop()
+            elif grupo == 'Z04':
+                n[i].infNFe.infAdic.obsCont.xCampo.valor = line.pop()
+                n[i].infNFe.infAdic.obsCont.xTexto.valor = line.pop()
+            elif grupo == 'Z07':
+                n[i].infNFe.infAdic.obsFisco.xCampo.valor = line.pop()
+                n[i].infNFe.infAdic.obsFisco.xTexto.valor = line.pop()
+            elif grupo == 'Z10':
+                n[i].infNFe.infAdic.procRef.nProc.valor   = line.pop()
+                n[i].infNFe.infAdic.procRef.indProc.valor = line.pop()
+            elif grupo == 'ZA':
+                raise GroupNotImplementd(grupo)
+            elif grupo == 'ZB':
+                raise GroupNotImplementd(grupo)
+        return n
+                
+    def validate(self):
+        for line in self.txt:
+            pass
+        return True
+    
+    
