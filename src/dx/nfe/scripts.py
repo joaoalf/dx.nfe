@@ -3,20 +3,20 @@
 def dxnfe():
     """Script principal da aplicação"""
     import sys
-    import os
-    import random
-    import time
+    #import os
+    #import random
+    #import time
     import ConfigParser
-    import datetime
-    from decimal import Decimal
+    #import datetime
+    #from decimal import Decimal
     from optparse import OptionParser
+    import dx.nfe.dxnfe
     #from dx.nfe import emissor, cancelador, inutilizador
 
     ## Constants
     CONF_FILE = ['./dxnfe.cfg',
                  '/etc/dxnfe.cfg',
                  '/usr/local/etc/dxnfe.cfg']
-
     ##
 
     parser = OptionParser(usage=u"""%prog [options]""")
@@ -64,14 +64,17 @@ def dxnfe():
     opts, args = parser.parse_args()
 
     config = ConfigParser.RawConfigParser()
-    config.read(CONF_FILE)
+    if not opts.config:
+        config.read(CONF_FILE)
+    else:
+        config.read([opts.config])
 
     try:        
         if not opts.status:
-            opts.directory = config.get(u'main', u'status')
-        if not opts.cert:
-            opts.cert = config.get(u'main', u'cert')
-        if not opts.mode:
+            opts.status = config.get(u'main', u'status')
+        #if not opts.cert:
+        opts.cert = config.get(u'main', u'cert')
+        if not opts.modo:
             opts.modo = config.get(u'main', u'modo')
         if opts.modo == 'EMISSAO':
             if not opts.nfe:
@@ -80,17 +83,18 @@ def dxnfe():
                 opts.xml = config.get(u'main', u'xml')
             if not opts.danfe:
                 opts.danfe = config.get(u'main', u'danfe')
-            if not opts.espera:
-                opts.espera = config.get(opts.site, u'espera')
+            #if not opts.espera:
+            #    opts.espera = config.get(opts.site, u'espera')
         elif opts.modo == u'CANCELAMENTO':
             if not opts.chave:
                 raise ValueError
         del config
     except (ConfigParser.NoOptionError, ValueError):
         parser.print_help()
+        raise
         sys.exit(-1)
         
-    app = DX_NFE(opts.modo,
+    app = dx.nfe.dxnfe.DX_NFE(opts.modo,
                  opts.cert,
                  opts.nfe,
                  opts.xml,

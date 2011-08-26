@@ -1,0 +1,8 @@
+<component name="libraryTable">
+  <library name="Buildout Eggs">
+    <CLASSES>
+      <root url="file://$PROJECT_DIR$/parts/buildout" />
+    </CLASSES>
+    <SOURCES />
+  </library>
+</component>
