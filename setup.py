@@ -19,5 +19,6 @@ setup(
                       'zope.interface',
                       'zope.event',
                       'lxml',
-                      'PySPED'],
+                      'PySPED',
+                      'libxml2-python'],
 )
