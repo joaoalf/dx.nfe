@@ -15,14 +15,14 @@ class INFeDataSource(Interface):
         
     def validate(self, f):
         """
-        Valida o formato de entrada do arquivo txt. 
+        Valida o formato de entrada.
         """
 
     def load(self, f):
         """
         Carrega os dados do arquivo em um dicionario.
         """
-        
+
 class INFeXml(Interface):
     """
     Este modelo representa a NF-e no seu formato xml.
@@ -30,7 +30,7 @@ class INFeXml(Interface):
 
     root = Attribute("Raiz do documento XML.")
     
-    def __repr__:
+    def __repr__(self):
         """
         Exibe a repreentacao da NF-e em XML.
         """
@@ -42,7 +42,7 @@ class IXmlMsg(Interface):
     
     root = Attribute("Raiz do documento XML.")
     
-    def __repr__:
+    def __repr__(self):
         """
         Exibe a representacao da Mensagem XML.
         """
