@@ -55,11 +55,11 @@ def dxnfe():
                       type=u'string',
                       action=u'store',
                       help=u"""Chave da NFE""")    
-    parser.add_option(u'-S',
-                      u'--site',
+    parser.add_option(u'-t',
+                      u'--tipo',
                       type=u'string',
                       action=u'store',
-                      help=u"""Filial""")
+                      help=u"""Formato do arquivo de entrada""")
 
     opts, args = parser.parse_args()
 
@@ -74,6 +74,10 @@ def dxnfe():
             opts.status = config.get(u'main', u'status')
         #if not opts.cert:
         opts.cert = config.get(u'main', u'cert')
+        opts.cert_pw = config.get(u'main', u'senha')
+        opts.versao = config.get(u'main', u'versao')
+        opts.ambiente = config.get(u'main', u'ambiente')
+
         if not opts.modo:
             opts.modo = config.get(u'main', u'modo')
         if opts.modo == 'EMISSAO':
@@ -83,23 +87,32 @@ def dxnfe():
                 opts.xml = config.get(u'main', u'xml')
             if not opts.danfe:
                 opts.danfe = config.get(u'main', u'danfe')
-            #if not opts.espera:
-            #    opts.espera = config.get(opts.site, u'espera')
+            if not opts.tipo:
+                opts.tipo = config.get(u'main', u'tipo')
         elif opts.modo == u'CANCELAMENTO':
             if not opts.chave:
                 raise ValueError
+
         del config
     except (ConfigParser.NoOptionError, ValueError):
         parser.print_help()
         raise
         sys.exit(-1)
-        
-    app = dx.nfe.dxnfe.DX_NFE(opts.modo,
-                 opts.cert,
-                 opts.nfe,
-                 opts.xml,
-                 opts.danfe,
-                 opts.status,
-                 opts.chave)
+
+    #print opts.tipo
+    
+    app = dx.nfe.dxnfe.DX_NFE(
+        opts.modo,
+        opts.cert,
+        opts.cert_pw,
+        opts.nfe,
+        opts.xml,
+        opts.danfe,
+        opts.status,
+        opts.chave,
+        opts.tipo,
+        opts.versao,
+        opts.ambiente)
+    #print dir(app)
     app.main()
     
