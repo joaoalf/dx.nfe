@@ -3,7 +3,7 @@
   <component name="FacetManager">
     <facet type="buildout-python" name="Buildout Support">
       <configuration>
-        <option name="script" value="$MODULE_DIR$/bin/buildout" />
+        <option name="script" value="$MODULE_DIR$/bin/dxnfe" />
       </configuration>
     </facet>
   </component>
