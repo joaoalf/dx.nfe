@@ -1,5 +1,6 @@
 *.pyc
 *.pyo
+src/dx/nfe/*.pyc
 .installed.cfg
 bin
 develop-eggs
@@ -8,5 +9,9 @@ downloads
 eggs
 parts
 src/*.egg-info
-.idea/*
+src/*.egg-info/*
 *.pfx
+homologacao
+producao
+teste
+.idea
