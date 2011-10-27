@@ -3,7 +3,7 @@ from zope.interface import implements
 from zope.component import adapts
 from interfaces import INFeXml, INFeDataSource
 from datetime import datetime
-from pysped.nfe.manual_401 import NFe_200, Det_200, Vol_200, Lacres_200
+from pysped.nfe.manual_401 import NFe_200, Det_200, Vol_200, Lacres_200, Dup_200
 from pysped.nfe.manual_300 import NFe_110, Det_110
 
 class NFeSP(object):
@@ -36,7 +36,8 @@ class NFeSP(object):
                     line.reverse()
                     grupo = line.pop()
                 else:
-                    grupo = line
+                    grupo = line.replace('\n', '')
+                    #print grupo
                     
                 #print grupo
                 if grupo == 'NOTA FISCAL':
@@ -77,10 +78,11 @@ class NFeSP(object):
                     n[i].infNFe.ide.tpEmis.valor  = line.pop()
                     n[i].infNFe.ide.cDV.valor     = line.pop()
                     n[i].infNFe.ide.tpAmb.valor   = line.pop()
-                    #n[i].infNFe.ide.indPag.valor  = line.pop()
                     n[i].infNFe.ide.finNFe.valor  = line.pop()
                     n[i].infNFe.ide.procEmi.valor = line.pop()
                     n[i].infNFe.ide.verProc.valor = line.pop()
+                    n[i].infNFe.ide.dhCont.valor  = line.pop()
+                    n[i].infNFe.ide.xJust.valor   = line.pop()
                 elif grupo == 'C':
                     #
                     # Emitente
@@ -91,15 +93,15 @@ class NFeSP(object):
                     n[i].infNFe.emit.IEST.valor  = line.pop()
                     n[i].infNFe.emit.IM.valor    = line.pop()
                     n[i].infNFe.emit.CNAE.valor  = line.pop()
-                    n[i].infNFe.emit.CRT.valor   = line.pop()
+                    n[i].infNFe.emit.CRT.valor   = int(line.pop())
 
                 elif grupo == 'C02':
                     n[i].infNFe.emit.CNPJ.valor  = line.pop()
                 elif grupo == 'C02a':
-                    n[i].infNFe.emit.CNPJ.valor  = line.pop()
+                    n[i].infNFe.emit.CPF.valor  = line.pop()
                 elif grupo == 'C05':
                     n[i].infNFe.emit.enderEmit.xLgr.valor    = line.pop()
-                    n[i].infNFe.emit.enderEmit.nro.valor     = line.pop()
+                    n[i].infNFe.emit.enderEmit.nro.valor     = line.pop() + '_'
                     n[i].infNFe.emit.enderEmit.xCpl.valor    = line.pop()
                     n[i].infNFe.emit.enderEmit.xBairro.valor = line.pop()
                     n[i].infNFe.emit.enderEmit.cMun.valor    = line.pop()
@@ -128,7 +130,7 @@ class NFeSP(object):
                     n[i].infNFe.dest.CPF.valor   = line.pop()
                 elif grupo == 'E05':
                     n[i].infNFe.dest.enderDest.xLgr.valor    = line.pop()
-                    n[i].infNFe.dest.enderDest.nro.valor     = line.pop()
+                    n[i].infNFe.dest.enderDest.nro.valor     = line.pop() #+ '_'
                     n[i].infNFe.dest.enderDest.xCpl.valor    = line.pop()
                     n[i].infNFe.dest.enderDest.xBairro.valor = line.pop()
                     n[i].infNFe.dest.enderDest.cMun.valor    = line.pop()
@@ -141,7 +143,7 @@ class NFeSP(object):
                     #
                     # Emeio
                     #
-                    #n[i].infNFe.dest.email.valor = u'emeio@servidor.com.br'
+                    n[i].infNFe.dest.email.valor             = line.pop()
                 elif grupo == 'F':
                     n[i].infNFe.retirada.enderDest.CNPJ.valor    = line.pop()
                     n[i].infNFe.retirada.enderDest.xLgr.valor    = line.pop()
@@ -174,27 +176,32 @@ class NFeSP(object):
                     #print line
                     d1.prod.cProd.valor    = line.pop()
                     d1.prod.cEAN.valor     = line.pop()
+                    d1.prod.cEAN.valor     = u''
                     d1.prod.xProd.valor    = line.pop()
                     d1.prod.NCM.valor      = line.pop()
                     d1.prod.EXTIPI.valor   = line.pop()
-                    #d1.prod.genero.valor   = line.pop()
                     d1.prod.CFOP.valor     = line.pop()
                     d1.prod.uCom.valor     = line.pop()
                     d1.prod.qCom.valor     = line.pop()
                     d1.prod.vUnCom.valor   = line.pop()
                     d1.prod.vProd.valor    = line.pop()
-                    d1.prod.cEANTrib.valor = line.pop()
+                    cEANTrib = line.pop()
+                    if cEANTrib == '' and d1.prod.cEAN.valor != '':
+                        d1.prod.cEANTrib.valor = d1.prod.cEAN.valor
+                    else:
+                        d1.prod.cEANTrib.valor = cEANTrib
+                        
                     d1.prod.uTrib.valor    = line.pop()
                     d1.prod.qTrib.valor    = line.pop()
                     d1.prod.vUnTrib.valor  = line.pop()
                     d1.prod.vFrete.valor   = line.pop()
                     d1.prod.vSeg.valor     = line.pop()
                     d1.prod.vDesc.valor    = line.pop()
-                    #d1.prod.vOutro.valor   = line.pop()
+                    d1.prod.vOutro.valor   = line.pop()
                     #
                     # Produto entra no total da NF-e
                     #
-                    #d1.prod.indTot.valor   = 1
+                    d1.prod.indTot.valor   = line.pop()
                 elif grupo == 'I18':
                     d1.prod.DI.dDI.valor         = line.pop()
                     d1.prod.DI.xLocDesemb.valor  = line.pop()
@@ -247,7 +254,7 @@ class NFeSP(object):
                     d1.imposto.ICMS.vICMS.valor    = line.pop()
                     d1.imposto.ICMS.modBCST.valor  = line.pop()
                     d1.imposto.ICMS.pMVAST.valor   = line.pop()
-                    d1.imposto.ICMS.pRedBSCT.valor = line.pop()
+                    d1.imposto.ICMS.pRedBCST.valor = line.pop()
                     d1.imposto.ICMS.vBCST.valor    = line.pop()
                     d1.imposto.ICMS.pICMSST.valor  = line.pop()
                     d1.imposto.ICMS.vICMSST.valor  = line.pop()
@@ -403,6 +410,8 @@ class NFeSP(object):
                     # Inclui o detalhe na NF-e
                 elif grupo == 'W':
                     # Totais
+                    #print "Totais"
+                    #print d
                     for prod in d:
                         prod.imposto.regime_tributario = 3
                         n[i].infNFe.det.append(prod)
@@ -479,14 +488,16 @@ class NFeSP(object):
                 elif grupo == 'Y':
                     pass
                 elif grupo == 'Y02':
-                    n[i].infNFe.cobr.nFat.valor  = line.pop()
-                    n[i].infNFe.cobr.vOrig.valor = line.pop()
-                    n[i].infNFe.cobr.vDesc.valor = line.pop()
-                    n[i].infNFe.cobr.vLiq.valor  = line.pop()
+                    n[i].infNFe.cobr.fat.nFat.valor  = line.pop()
+                    n[i].infNFe.cobr.fat.vOrig.valor = line.pop()
+                    n[i].infNFe.cobr.fat.vDesc.valor = line.pop()
+                    n[i].infNFe.cobr.fat.vLiq.valor  = line.pop()
                 elif grupo == 'Y07':
-                    n[i].infNFe.cobr.nDup.valor  = line.pop()
-                    n[i].infNFe.cobr.dVenc.valor = line.pop()
-                    n[i].infNFe.cobr.vDup.valor  = line.pop()
+                    dup1 = Dup_200()
+                    dup1.nDup.valor  = line.pop()
+                    dup1.dVenc.valor = line.pop()
+                    dup1.vDup.valor  = line.pop()
+                    n[i].infNFe.cobr.dup.append(dup1)
                 elif grupo == 'Z':
                     n[i].infNFe.infAdic.infAdFisco.valor = line.pop()
                     n[i].infNFe.infAdic.infCpl.valor     = line.pop()
