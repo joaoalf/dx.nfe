@@ -25,6 +25,11 @@ def dxnfe():
                       type=u'string',
                       action=u'store',
                       help=u"""Configration file""")
+    parser.add_option(u'-u',
+                      u'--uf',
+                      type=u'string',
+                      action=u'store',
+                      help=u"""Unidade Federativa""")
     parser.add_option(u'-s',
                       u'--status',
                       type=u'string',
@@ -60,6 +65,11 @@ def dxnfe():
                       type=u'string',
                       action=u'store',
                       help=u"""Formato do arquivo de entrada""")
+    parser.add_option(u'-j',
+                      u'--justificativa',
+                      type=u'string',
+                      action=u'store',
+                      help=u"""Justificativa para cancelamento""")
 
     opts, args = parser.parse_args()
 
@@ -90,7 +100,7 @@ def dxnfe():
             if not opts.tipo:
                 opts.tipo = config.get(u'main', u'tipo')
         elif opts.modo == u'CANCELAMENTO':
-            if not opts.chave:
+            if not opts.chave or not opts.justificativa:
                 raise ValueError
 
         del config
@@ -112,7 +122,9 @@ def dxnfe():
         opts.chave,
         opts.tipo,
         opts.versao,
-        opts.ambiente)
+        opts.ambiente,
+        opts.uf,
+        opts.justificativa)
     #print dir(app)
     app.main()
     
