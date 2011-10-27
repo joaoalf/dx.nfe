@@ -20,5 +20,6 @@ setup(
                       'zope.event',
                       'lxml',
                       'PySPED',
-                      'libxml2-python'],
+                      'libxml2-python',
+                      'pyPdf'],
 )
