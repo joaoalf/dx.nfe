@@ -1,3 +1,0 @@
-[console_scripts]
-dxnfe = dx.nfe.scripts:dxnfe
-

@@ -1,8 +1,0 @@
-setuptools
-zope.component
-zope.interface
-zope.event
-lxml
-PyXMLSec
-reportlab
-Geraldo
