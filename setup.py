@@ -13,6 +13,7 @@ setup(
     packages=find_packages('src'), 
     include_package_data=True,
     entry_points={'console_scripts':['dxnfe = dx.nfe.scripts:dxnfe',],},
+    zip_safe = False,
     dependency_links = ['https://github.com/joaoalf/PySPED/tarball/master#egg=PySPED-0.1dev_joaoalf_branch'],
     install_requires=['setuptools',
                       'zope.component',
@@ -20,6 +21,6 @@ setup(
                       'zope.event',
                       'lxml',
                       'PySPED',
-                      'libxml2-python',
+                      #'libxml2-python',
                       'pyPdf'],
 )
