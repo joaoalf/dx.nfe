@@ -130,7 +130,7 @@ class NFeSP(object):
                     n[i].infNFe.dest.CPF.valor   = line.pop()
                 elif grupo == 'E05':
                     n[i].infNFe.dest.enderDest.xLgr.valor    = line.pop()
-                    n[i].infNFe.dest.enderDest.nro.valor     = line.pop() #+ '_'
+                    n[i].infNFe.dest.enderDest.nro.valor     = line.pop() + '_'
                     n[i].infNFe.dest.enderDest.xCpl.valor    = line.pop()
                     n[i].infNFe.dest.enderDest.xBairro.valor = line.pop()
                     n[i].infNFe.dest.enderDest.cMun.valor    = line.pop()

@@ -87,6 +87,7 @@ def dxnfe():
         opts.cert_pw = config.get(u'main', u'senha')
         opts.versao = config.get(u'main', u'versao')
         opts.ambiente = config.get(u'main', u'ambiente')
+        opts.logo = config.get(u'main', u'logo')
 
         if not opts.modo:
             opts.modo = config.get(u'main', u'modo')
@@ -124,7 +125,8 @@ def dxnfe():
         opts.versao,
         opts.ambiente,
         opts.uf,
-        opts.justificativa)
+        opts.justificativa,
+        opts.logo)
     #print dir(app)
     app.main()
     
