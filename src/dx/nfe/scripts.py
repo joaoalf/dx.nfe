@@ -1,5 +1,61 @@
 # -*- coding: utf-8 -*-
 
+CONF_FILE = ['./dxnfe.cfg',
+             '/etc/dxnfe.cfg',
+             '/usr/local/etc/dxnfe.cfg']
+
+def dxgetdata():
+    """Get tags from a xml file
+    """
+    import sys
+    import ConfigParser
+    from optparse import OptionParser
+    import dx.nfe.getdata
+
+    parser = OptionParser(usage=u"""%prog [options]""")
+    parser.add_option(u'-c',
+                      u'--config',
+                      type=u'string',
+                      action=u'store',
+                      help=u"""Configration file""")
+    parser.add_option(u'-x',
+                      u'--xml',
+                      type=u'string',
+                      action=u'store',
+                      help=u"""Xml file""")
+    parser.add_option(u'-f',
+                      u'--first-only',
+                      dest=u'first_only',
+                      action=u'store_true',
+                      help=u"""Return only the first element found""")
+
+    opts, args = parser.parse_args()
+
+    config = ConfigParser.RawConfigParser()
+    if not opts.config:
+        config.read(CONF_FILE)
+    else:
+        config.read([opts.config])
+
+    try:
+        opts.tags = config.get(u'dxgetdata', u'tags')
+        if not opts.xml:
+            opts.xml = config.get(u'dxgetdata', u'xml')
+        if not opts.first_only:
+            if config.get(u'dxgetdata', u'primeiro') == '0':
+                opts.first_only = False
+            elif config.get(u'dxgetdata', u'primeiro') == '1':
+                opts.first_only = True
+        
+        del config
+    except (ConfigParser.NoOptionError, ValueError):
+        parser.print_help()
+        raise
+        sys.exit(-1)
+
+    App = dx.nfe.getdata.GetData(opts.xml, opts.tags.split(), opts.first_only)
+    App.main()
+
 def dxnfe():
     """Script principal da aplicação"""
     import sys
@@ -14,9 +70,6 @@ def dxnfe():
     #from dx.nfe import emissor, cancelador, inutilizador
 
     ## Constants
-    CONF_FILE = ['./dxnfe.cfg',
-                 '/etc/dxnfe.cfg',
-                 '/usr/local/etc/dxnfe.cfg']
     ##
 
     parser = OptionParser(usage=u"""%prog [options]""")
@@ -45,6 +98,11 @@ def dxnfe():
                       type=u'string',
                       action=u'store',
                       help=u"""Arquivo de NFE""")    
+    parser.add_option(u'-p',
+                      u'--prefixo',
+                      type=u'string',
+                      action=u'store',
+                      help=u"""Prefixo da geração dos arquivos""")
     parser.add_option(u'-x',
                       u'--xml',
                       type=u'string',
@@ -79,7 +137,7 @@ def dxnfe():
     else:
         config.read([opts.config])
 
-    try:        
+    try:
         if not opts.status:
             opts.status = config.get(u'main', u'status')
         #if not opts.cert:
@@ -94,10 +152,10 @@ def dxnfe():
         if opts.modo == 'EMISSAO':
             if not opts.nfe:
                 opts.nfe = config.get(u'main', u'nfe')
-            if not opts.xml:
-                opts.xml = config.get(u'main', u'xml')
-            if not opts.danfe:
-                opts.danfe = config.get(u'main', u'danfe')
+            if not opts.prefixo:
+                opts.xml = config.get(u'main', u'prefixo')
+            #if not opts.danfe:
+            #    opts.danfe = config.get(u'main', u'danfe')
             if not opts.tipo:
                 opts.tipo = config.get(u'main', u'tipo')
         elif opts.modo == u'CANCELAMENTO':
@@ -117,8 +175,8 @@ def dxnfe():
         opts.cert,
         opts.cert_pw,
         opts.nfe,
-        opts.xml,
-        opts.danfe,
+        opts.prefixo,
+        #opts.danfe,
         opts.status,
         opts.chave,
         opts.tipo,
