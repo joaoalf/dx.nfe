@@ -12,7 +12,8 @@ setup(
     package_dir={'': 'src'},
     packages=find_packages('src'), 
     include_package_data=True,
-    entry_points={'console_scripts':['dxnfe = dx.nfe.scripts:dxnfe',],},
+    entry_points={'console_scripts':['dxnfe = dx.nfe.scripts:dxnfe',
+                                     'dxgetdata = dx.nfe.scripts:dxgetdata'],},
     zip_safe = False,
     dependency_links = ['https://github.com/joaoalf/PySPED/tarball/master#egg=PySPED-0.1dev_joaoalf_branch'],
     install_requires=['setuptools',
@@ -22,5 +23,5 @@ setup(
                       'lxml',
                       'PySPED',
                       'libxml2-python',
-                      'pyPdf'],
+                      'lpod-python',],
 )
