@@ -165,7 +165,6 @@ def dxnfe():
         del config
     except (ConfigParser.NoOptionError, ValueError):
         parser.print_help()
-        raise
         sys.exit(-1)
 
     #print opts.tipo
