@@ -63,17 +63,6 @@ class DX_NFE(object):
                 for n in self.nfxml.nfs:
                     n.infNFe.ide.tpAmb.valor = int(self.proc.ambiente)
 
-
-            #
-            # O retorno de cada webservice é um dicionário
-            # estruturado da seguinte maneira:
-            # { TIPO_DO_WS_EXECUTADO: {
-            #       u'envio'   : InstanciaDaMensagemDeEnvio,
-            #       u'resposta': InstanciaDaMensagemDeResposta,
-            #       }
-            # }
-            #
-
             for processo in self.proc.processar_notas(self.nfxml.nfs):
                 with codecs.open(self.status, 'a', 'utf-8') as st:
                     st.write(u'|'.join(
@@ -85,11 +74,12 @@ class DX_NFE(object):
         elif self.mode == u'STATUSS':
             processo = self.proc.consultar_servico()
             with codecs.open(self.status, 'w', 'utf-8') as status:
-                fields = [processo.resposta.cStat.valor, processo.resposta.xMotivo.valor]
+                fields = [processo.resposta.cStat.valor,
+                          processo.resposta.xMotivo.valor]
                 status.write(u'|'.join(fields))
 
         elif self.mode == u'STATUSE':
-            processo = self.proc.consultar_nota(chave_nfe=self.key)
+            processo = self.proc.consultar_nota(chave_nfe=self.key, prefix=self.caminho)
             with codecs.open(self.status, 'w', 'utf-8') as status:
                 fields = [processo.resposta.cStat.valor, processo.resposta.xMotivo.valor]
                 if processo.resposta.cStat.valor in (u'100', u'110'):
