@@ -1,0 +1,113 @@
+[buildout]
+develop = . ../dx.recipe.libxml2-python ../PySPED ../geraldo
+parts =
+      libiconv
+      openssl
+      libxml2
+      libxslt
+      freetype
+      lxml
+      xmlsec
+      patch-libxml2-python
+      libxml2-python
+      PyXMLSec
+      dx.nfe
+#      scripts
+eggs = dx.nfe
+
+[libiconv]
+recipe = zc.recipe.cmmi
+url = http://ftp.gnu.org/pub/gnu/libiconv/libiconv-1.14.tar.gz
+
+[openssl]
+recipe = zc.recipe.cmmi
+url = http://www.openssl.org/source/openssl-0.9.8r.tar.gz
+configure-command = ./Configure
+extra_options = darwin64-x86_64-cc zlib-dynamic shared
+
+[libxml2]
+recipe = zc.recipe.cmmi
+url = http://xmlsoft.org/sources/libxml2-2.7.8.tar.gz
+extra_options = --with-iconv-prefix=${libiconv:location}
+                --without-python
+
+[libxslt]
+recipe = zc.recipe.cmmi
+url = http://xmlsoft.org/sources/libxslt-1.1.26.tar.gz
+extra_options = --with-libxml-prefix=${libxml2:location}
+                --without-python
+
+[freetype]
+recipe = zc.recipe.cmmi
+url = http://download.savannah.gnu.org/releases/freetype/freetype-2.4.7.tar.gz
+
+[xmlsec]
+recipe = zc.recipe.cmmi
+url = http://www.aleksey.com/xmlsec/download/xmlsec1-1.2.18.tar.gz
+extra_options =
+              --with-libxml=${libxml2:location}
+              --with-libxslt=${libxslt:location}
+              --with-openssl=${openssl:location}
+              --with-default-crypto=openssl
+environment = PKG_CONFIG_PATH=${libxml2:location}/lib/pkgconfig:${libxslt:location}/lib/pkgconfig:${openssl:location}/lib/pkgconfig
+
+[lxml]
+recipe = zc.recipe.egg:custom
+environment = lxml-env
+
+[lxml-env]
+XML2_CONFIG=${libxml2:location}/bin/xml2-config
+XSLT_CONFIG=${libxslt:location}/bin/xslt-config
+
+[PyXMLSec]
+recipe = zc.recipe.egg:custom
+environment = PyXMLSec-env
+#include-dirs = ${openssl:location}/include
+#library-dirs = ${openssl:location}/lib
+#rpath = ${openssl:location}/lib
+#libraries = ${openssl:location}/lib/libcrypto.a
+
+[PyXMLSec-env]
+PATH=${xmlsec:location}/bin:%(PATH)s
+PKG_CONFIG_PATH=${libxml2:location}/lib/pkgconfig:${libxslt:location}/lib/pkgconfig:${xmlsec:location}/lib/pkgconfig:${openssl:location}/lib/pkgconfig
+
+[patch-libxml2-python]
+recipe = dx.recipe.libxml2-python
+url = ${libxml2:url}
+libiconv-include-dir = ${libiconv:location}/include
+libxml2-include-dir = ${libxml2:location}/include
+libxslt-include-dir = ${libxslt:location}/include
+libiconv-lib-dir = ${libiconv:location}/lib
+libxml2-lib-dir = ${libxml2:location}/lib
+libxslt-lib-dir = ${libxslt:location}/lib
+
+[libxml2-python]
+recipe = zc.recipe.egg
+find-links = file://${buildout:directory}/
+#index = file://${buildout:directory}
+include-dirs = ${libxml2:location}/include
+               ${libxml2:location}/include/libxml2
+               ${libxslt:location}/include
+library-dirs = ${libxml2:location}/lib
+               ${libxslt:location}/lib
+rpath = ${libxml2:location}/lib
+        ${libxslt:location}/lib
+        
+[dx.nfe]
+recipe = zc.recipe.egg
+interpreter = python
+
+#eggs = ${buildout:eggs}
+
+#[scripts]
+#recipe = z3c.recipe.scripts
+#dependent-scripts = true
+#extra-paths = ${libxml2:location}
+#              ${libxslt:location}
+#              ${xmlsec:location}
+#interpreter = python
+#eggs =
+#     lxml
+#     PyXMLSec
+#     reportlab
+#     Geraldo
