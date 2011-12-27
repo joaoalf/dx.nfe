@@ -163,7 +163,7 @@ def dxnfe():
                 raise ValueError
 
         del config
-    except (ConfigParser.NoOptionError, ValueError):
+    except (ConfigParser.NoOptionError, ConfigParser.NoSectionError, ValueError):
         parser.print_help()
         sys.exit(-1)
 
