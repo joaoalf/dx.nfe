@@ -109,13 +109,15 @@ class DX_NFE(object):
                         prefix=self.caminho)
                     fields = [processo2.resposta.infCanc.cStat.valor, processo2.resposta.infCanc.xMotivo.valor]
                     if processo2.resposta.infCanc.cStat.valor == u'101':
-                        fields.append(processo2.resposta.infCanc.dhRecbto.valor)
+                        fields.append(processo2.resposta.infCanc.dhRecbto.valor.strftime('%c'))
                         fields.append(processo2.resposta.infCanc.nProt.valor)
 
                     try:
                         status.write(u'|'.join(fields))
                     except:
                         print processo2.resposta.xml
+                        print fields
+                        raise
                 
         elif self.mode == u'INUTILIZACAO':
             processo = self.proc.inutilizar_nota()
