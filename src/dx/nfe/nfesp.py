@@ -53,7 +53,12 @@ class NFeSP(object):
                         NFe = NFe_200
                     else:
                         NFe = None
+                    id = line.pop()
+
                     n.append(NFe())
+                    n[i].infNFe.Id.valor = id
+                    n[i].chave = id[3:]
+
                 elif grupo == 'B':
                     #
                     # Identificação da NF-e
