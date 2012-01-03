@@ -90,6 +90,10 @@ class DX_NFE(object):
                 status.write(u'|'.join(fields))
 
         elif self.mode == u'CANCELAMENTO':
+            with open(self.justificativa, 'r') as fjust:
+                just = fjust.readline()
+
+
             processo1 = self.proc.consultar_nota(chave_nfe=self.key, prefix=self.caminho)
             fields = [processo1.resposta.cStat.valor, processo1.resposta.xMotivo.valor]
             if processo1.resposta.cStat.valor in (u'100', u'110'):
@@ -105,7 +109,7 @@ class DX_NFE(object):
                     processo2 = self.proc.cancelar_nota(
                         chave_nfe=self.key,
                         numero_protocolo=processo1.resposta.protNFe.infProt.nProt.valor,
-                        justificativa=self.justificativa,
+                        justificativa=just,
                         prefix=self.caminho)
                     fields = [processo2.resposta.infCanc.cStat.valor, processo2.resposta.infCanc.xMotivo.valor]
                     if processo2.resposta.infCanc.cStat.valor == u'101':

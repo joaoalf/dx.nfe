@@ -127,7 +127,7 @@ def dxnfe():
                       u'--justificativa',
                       type=u'string',
                       action=u'store',
-                      help=u"""Justificativa para cancelamento""")
+                      help=u"""Arquivo contendo a justificativa para cancelamento""")
 
     opts, args = parser.parse_args()
 
@@ -248,6 +248,10 @@ def dxnfe():
             print "Parametro incorreto: -k ", opts.chave
             sys.exit(-1)
 
+    else:
+        parser.print_help()
+        print u"Parametro incorreto: -m ", opts.modo
+        sys.exit(-1)
 
     del config
 #except (ConfigParser.NoOptionError, ConfigParser.NoSectionError, ValueError):
