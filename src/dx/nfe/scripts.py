@@ -147,11 +147,13 @@ def dxnfe():
 
     try:
         if not opts.uf:
-            opts.status = config.get(u'main', u'uf')
+            opts.uf = config.get(u'main', u'uf')
+
     except (ConfigParser.NoOptionError, ConfigParser.NoSectionError, ValueError):
         parser.print_help()
         print "Parametro incorreto: -u ", opts.uf
         sys.exit(-1)
+
 
         #if not opts.cert:
     opts.cert = config.get(u'main', u'cert')
@@ -169,7 +171,7 @@ def dxnfe():
         print "Parametro incorreto: -m ", opts.modo
         sys.exit(-1)
 
-    if opts.modo == 'EMISSAO':
+    if opts.modo == u'EMISSAO' or opts.modo == u'emissao':
         try:
             if not opts.nfe:
                 opts.nfe = config.get(u'main', u'nfe')
@@ -197,7 +199,7 @@ def dxnfe():
             print "Parametro incorreto: -t ", opts.tipo
             sys.exit(-1)
 
-    elif opts.modo == u'CANCELAMENTO':
+    elif opts.modo == u'CANCELAMENTO' or opts.modo == u'cancelamento':
         try:
             if not opts.chave:
                 raise ValueError
@@ -225,7 +227,8 @@ def dxnfe():
             print "Parametro incorreto: -p ", opts.prefixo
             sys.exit(-1)
 
-    elif opts.modo == u'STATUSS':
+    elif opts.modo == u'STATUSS' or opts.modo == u'statuss':
+
         try:
             if not opts.prefixo:
                 raise ValueError
@@ -235,7 +238,7 @@ def dxnfe():
             print "Parametro incorreto: -p ", opts.prefixo
             sys.exit(-1)
 
-    elif opts.modo == u'STATUSE':
+    elif opts.modo == u'STATUSE' or opts.modo == u'statuse':
         try:
             if not opts.chave:
                 raise ValueError
@@ -254,7 +257,7 @@ def dxnfe():
     #print opts.tipo
     
     app = dx.nfe.dxnfe.DX_NFE(
-        opts.modo,
+        opts.modo.upper(),
         opts.cert,
         opts.cert_pw,
         opts.nfe,
@@ -265,7 +268,7 @@ def dxnfe():
         opts.tipo,
         opts.versao,
         opts.ambiente,
-        opts.uf,
+        opts.uf.upper(),
         opts.justificativa,
         opts.logo)
     #print dir(app)
