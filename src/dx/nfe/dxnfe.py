@@ -21,7 +21,11 @@ class DX_NFE(object):
                  ambiente,
                  uf,
                  justificativa,
-                 logo):
+                 logo,
+                 cnpj,
+                 serie,
+                 numero_inicial,
+                 numero_final):
         #self.directory = directory
         if mode == u'EMISSAO':
             self.caminho = os.path.join(prefix, os.path.split(nfe)[1][:-4])
@@ -48,6 +52,11 @@ class DX_NFE(object):
         self.proc.contingencia_SCAN = False
         #self.proc.caminho = u''
         self.justificativa = unicode(justificativa)
+
+        self.cnpj = cnpj
+        self.serie = serie
+        self.numero_inicial = numero_inicial
+        self.numero_final = numero_final
 
     def main(self):
         #print self.mode
@@ -124,9 +133,23 @@ class DX_NFE(object):
                         raise
                 
         elif self.mode == u'INUTILIZACAO':
-            processo = self.proc.inutilizar_nota()
-            print u"Status: " + str(processo.resposta.status)
-            print u"Motivo: " + unicode(processo.resposta.xMotivo.valor)
-            #print
-            print processo.resposta.reason
+            with open(self.justificativa, 'r') as fjust:
+                just = fjust.readline()
+
+            processo1 = p.inutilizar_nota(
+                cnpj=self.cnpj,
+                serie=self.serie,
+                numero_inicial=self.numero_inicial,
+                numero_final=self.numero_final,
+                justificativa=just
+            )
+
+            fields = [processo1.resposta.infInut.cStat.valor, processo1.resposta.infInut.xMotivo.valor]
+            if processo1.resposta.cStat.valor == u'102':
+                fields.append(processo1.resposta.infInut.dhRecbto.valor.strftime('%c'))
+                fields.append(processo1.resposta.infInut.nProt.valor)
+
+            with codecs.open(self.status, 'a', 'utf-8') as status:
+                status.write(u'|'.join(fields))
+                status.write('\n')
 

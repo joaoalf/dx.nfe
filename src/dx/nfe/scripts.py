@@ -38,13 +38,13 @@ def dxgetdata():
         config.read([opts.config])
 
     try:
-        opts.tags = config.get(u'dxgetdata', u'tags')
+        opts.tags = config.get(u'getdata', u'tags')
         if not opts.xml:
-            opts.xml = config.get(u'dxgetdata', u'xml')
+            opts.xml = config.get(u'getdata', u'xml')
         if not opts.first_only:
-            if config.get(u'dxgetdata', u'primeiro') == '0':
+            if config.get(u'getdata', u'primeiro') == '0':
                 opts.first_only = False
-            elif config.get(u'dxgetdata', u'primeiro') == '1':
+            elif config.get(u'getdata', u'primeiro') == '1':
                 opts.first_only = True
         
         del config
@@ -128,6 +128,30 @@ def dxnfe():
                       type=u'string',
                       action=u'store',
                       help=u"""Arquivo contendo a justificativa para cancelamento""")
+    parser.add_option(
+        u'-C',
+        u'--cnpj',
+        type=u'string',
+        action=u'store',
+        help=u"""CNPJ para inutilizaco""")
+    parser.add_option(
+        u'-S',
+        u'--serie',
+        type=u'string',
+        action=u'store',
+        help=u"""Serie da NFs para inutilizacao""")
+    parser.add_option(
+        u'-b',
+        u'--numero_inicial',
+        type=u'string',
+        action=u'store',
+        help=u"""Numero inicial para inutilizacao""")
+    parser.add_option(
+        u'-e',
+        u'--numero_final',
+        type=u'string',
+        action=u'store',
+        help=u"""Numero final para inutilizacao""")
 
     opts, args = parser.parse_args()
 
@@ -248,6 +272,70 @@ def dxnfe():
             print "Parametro incorreto: -k ", opts.chave
             sys.exit(-1)
 
+    elif opts.modo == u'INUTILIZACAO' or opts.modo == u'inutilizacao':
+        try:
+            if not opts.cnpj:
+                raise ValueError
+
+        except (ConfigParser.NoOptionError, ConfigParser.NoSectionError, ValueError):
+            parser.print_help()
+            print "Parametro incorreto: -C ", opts.cnpj
+            sys.exit(-1)
+
+        try:
+            if not opts.serie:
+                raise ValueError
+
+        except (ConfigParser.NoOptionError, ConfigParser.NoSectionError, ValueError):
+            parser.print_help()
+            print "Parametro incorreto: -S ", opts.serie
+            sys.exit(-1)
+
+        try:
+            if not opts.numero_inicial:
+                raise ValueError
+
+        except (ConfigParser.NoOptionError, ConfigParser.NoSectionError, ValueError):
+            parser.print_help()
+            print "Parametro incorreto: -b ", opts.numero_inicial
+            sys.exit(-1)
+
+        try:
+            if not opts.numero_final:
+                raise ValueError
+
+        except (ConfigParser.NoOptionError, ConfigParser.NoSectionError, ValueError):
+            parser.print_help()
+            print "Parametro incorreto: -e ", opts.numero_final
+            sys.exit(-1)
+
+        try:
+            if not opts.numero_final:
+                raise ValueError
+
+        except (ConfigParser.NoOptionError, ConfigParser.NoSectionError, ValueError):
+            parser.print_help()
+            print "Parametro incorreto: -j ", opts.justificativa
+            sys.exit(-1)
+
+        try:
+            if not opts.prefixo:
+                raise ValueError
+
+        except (ConfigParser.NoOptionError, ConfigParser.NoSectionError, ValueError):
+            parser.print_help()
+            print "Parametro incorreto: -p ", opts.prefixo
+            sys.exit(-1)
+
+        try:
+            if not opts.justificativa:
+                raise ValueError
+
+        except (ConfigParser.NoOptionError, ConfigParser.NoSectionError, ValueError):
+            parser.print_help()
+            print "Parametro incorreto: -j ", opts.justificativa
+            sys.exit(-1)
+
     else:
         parser.print_help()
         print u"Parametro incorreto: -m ", opts.modo
@@ -274,7 +362,78 @@ def dxnfe():
         opts.ambiente,
         opts.uf.upper(),
         opts.justificativa,
-        opts.logo)
+        opts.logo,
+        opts.cnpj,
+        opts.serie,
+        opts.numero_inicial,
+        opts.numero_final
+)
     #print dir(app)
     app.main()
-    
+
+def dxdanfe():
+    """Generate a DANFE from a xml file
+    """
+    import sys
+    import ConfigParser
+    from optparse import OptionParser
+    import dx.nfe.danfe
+
+    parser = OptionParser(usage=u"""%prog [options]""")
+    parser.add_option(u'-c',
+        u'--config',
+        type=u'string',
+        action=u'store',
+        help=u"""Configration file""")
+    parser.add_option(u'-x',
+        u'--xml',
+        type=u'string',
+        action=u'store',
+        help=u"""Xml file""")
+    parser.add_option(u'-l',
+        u'--logo',
+        type=u'string',
+        action=u'store',
+        help=u"""Logo file""")
+    parser.add_option(u'-p',
+        u'--prefixo',
+        type=u'string',
+        action=u'store',
+        help=u"""Prefixo da geração dos arquivos""")
+    parser.add_option(u'-t',
+        u'--template',
+        type=u'string',
+        action=u'store',
+        help=u"""Caminho do template do DANFE""")
+    parser.add_option(u'-o',
+        u'--orientacao',
+        type=u'string',
+        action=u'store',
+        help=u"""0 - Retato / 1 - Paisagem""")
+
+    opts, args = parser.parse_args()
+
+    config = ConfigParser.RawConfigParser()
+    if not opts.config:
+        config.read(CONF_FILE)
+    else:
+        config.read([opts.config])
+
+    try:
+        if not opts.xml:
+            opts.xml = config.get(u'danfe', u'xml')
+
+        if not opts.template:
+            opts.template = config.get(u'danfe', u'template')
+
+        if not opts.logo:
+            opts.logo = config.get(u'danfe', u'logo')
+
+    except (ConfigParser.NoOptionError, ValueError):
+        parser.print_help()
+        sys.exit(-1)
+
+    del config
+
+    App = dx.nfe.danfe.Odf(opts.xml, opts.template, opts.orientacao, opts.logo, opts.prefixo)
+    App.main()
