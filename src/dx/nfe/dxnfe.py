@@ -150,6 +150,13 @@ class DX_NFE(object):
                 fields.append(processo1.resposta.infInut.nProt.valor)
 
             with codecs.open(self.status, 'a', 'utf-8') as status:
-                status.write(u'|'.join(fields))
-                status.write('\n')
+                try:
+                    status.write(u'|'.join(fields))
+                    status.write('\n')
+                except:
+                    print processo1.resposta.xml
+                    print fields
+                    raise
+
+
 
