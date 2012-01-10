@@ -136,7 +136,7 @@ class DX_NFE(object):
             with open(self.justificativa, 'r') as fjust:
                 just = fjust.readline()
 
-            processo1 = p.inutilizar_nota(
+            processo1 = self.proc.inutilizar_nota(
                 cnpj=self.cnpj,
                 serie=self.serie,
                 numero_inicial=self.numero_inicial,
