@@ -147,7 +147,7 @@ class DX_NFE(object):
             fields = [processo1.resposta.infInut.cStat.valor, processo1.resposta.infInut.xMotivo.valor]
             if processo1.resposta.infInut.cStat.valor == u'102':
                 fields.append(processo1.resposta.infInut.dhRecbto.valor.strftime('%c'))
-                fields.append(processo1.resposta.infInut.nProt.valor)
+                fields.append(str(processo1.resposta.infInut.nProt.valor))
 
             with codecs.open(self.status, 'a', 'utf-8') as status:
                 try:

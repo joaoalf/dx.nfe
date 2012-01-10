@@ -133,7 +133,7 @@ def dxnfe():
         u'--cnpj',
         type=u'string',
         action=u'store',
-        help=u"""CNPJ para inutilizaco""")
+        help=u"""CNPJ para inutilizacao""")
     parser.add_option(
         u'-S',
         u'--serie',
