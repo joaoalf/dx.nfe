@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
 __author__ = 'joaoalf'
 
-import os, shutil
+import os, shutil, re
 import lxml.etree as ET
+from lpod.frame import odf_create_image_frame
 from lpod.document import odf_get_document
+
 
 class OdfTemplateNotFound(Exception):
     def __init__(self, value=None):
@@ -42,10 +44,25 @@ class Odf(object):
     produto_fields = ['A35', 'C35', 'J35', 'K35', 'L35', 'M35', 'N35', 'P35',
                       'R35', 'T35', 'U35', 'V35', 'W35', 'X35', 'Y35', 'Z35']
 
-    def __init__(self, xml_path=None, orientation=0):
+    def __init__(self, xml_path=None, template_prefix=None, orientation=0, logo=u'', prefix=u''):
         self.xml_path = xml_path
+        self.template_prefix = template_prefix
         self.orientation = orientation
+        self.logo = logo
+        self.prefix = prefix
         self.nfe_id = None
+        self.template_path = os.path.join(
+            self.template_prefix,
+            'DanfeTemplate' + self.orientation + '.ods'
+        )
+
+    def main(self):
+        self.loadXmlFromFile()
+        self.nfe_id = self.getNfeId()
+        self.setTemplate()
+        self.fillDANFE()
+        shutil.copyfile(self.tmp_path, os.path.join(self.prefix, self.nfe_id + '.ods'))
+        os.unlink(self.tmp_path)
 
     def loadXmlFromFile(self):
         if os.path.exists(self.xml_path):
@@ -72,11 +89,13 @@ class Odf(object):
         else:
             return result_list[0].text
 
-    def setTemplate(self, path):
-        if os.path.exists(path):
-            shutil.copyfile(path, os.path.join(os.environ['TMPDIR'], self.nfe_id + '.ods'))
-            self.danfe = odf_get_document(os.path.join(os.environ['TMPDIR'], self.nfe_id + '.ods'))
+    def setTemplate(self):
+        if os.path.exists(self.template_path):
+            self.tmp_path = os.path.join(os.environ['TMPDIR'], self.nfe_id + '.ods')
+            shutil.copyfile( self.template_path, self.tmp_path)
+            self.danfe = odf_get_document(self.tmp_path)
         else:
+            print self.template_path
             raise OdfTemplateNotFound
 
     def fillCanhoto(self):
@@ -90,6 +109,59 @@ class Odf(object):
         table.set_cell(cell.name, cell)
 
         ## N. NF-e
+
+    def fillDANFE(self):
+        body = self.danfe.get_body()
+        danfe = body.get_table_list()[0]
+        #print danfe.get_size()
+        #print dir(danfe)
+        #print help(danfe)
+        #infNFe = self.xml_tree.xpath('//ns:infNFe', namespaces={'ns': self._namespace})[0]
+        #print dir(infNFe)
+        for n in self.xml_tree.iter():
+            #print n
+            try:
+                danfe_key = u'.'.join([
+                    n.getparent().tag.replace('{'+self._namespace+'}', ''),
+                    n.tag.replace('{'+self._namespace+'}', '')]
+                )
+                danfe_value = n.text
+                #print danfe_key
+            except AttributeError:
+                danfe_key = None
+
+            if danfe_key:
+                if re.search('ICMS[0-9][0-9]\.', danfe_key):
+                    danfe_key = danfe_key[:4] + danfe_key[6:]
+                    #print danfe_key
+
+                for x, y, c in danfe.get_cells(content=u'%%'+danfe_key+u'%%'):
+                    #print c.get_type(), c.get_value()
+                    c.set_value(c.get_value().replace(u'%%'+danfe_key+u'%%', danfe_value))
+                    danfe.set_cell((x, y), c)
+                    if danfe_key.find('prod') != -1 or danfe_key.find('ICMS') !=1:
+                        break
+
+        x, y, c = danfe.get_cells(content=u'danfe.xLogo')[0]
+        logo_uri = self.danfe.add_file(self.logo)
+
+        frame = odf_create_image_frame(
+            logo_uri,
+            ##size=('2.00cm', '5.00cm'),
+            anchor_type='frame',
+            position=('0cm', '0cm')
+        )
+
+        danfe.set_cell_image((x, y), frame, type=self.danfe.get_type())
+
+        for x, y, c in danfe.get_cells(content=u'%%'):
+            regex = re.search('%%.*%%', c.get_value())
+            c.set_value(c.get_value().replace(regex.group(0), u''))
+            danfe.set_cell((x, y), c)
+
+
+        self.danfe.save()
+
 
 
     
