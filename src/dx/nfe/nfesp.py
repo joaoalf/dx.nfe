@@ -106,7 +106,7 @@ class NFeSP(object):
                     n[i].infNFe.emit.CPF.valor  = line.pop()
                 elif grupo == 'C05':
                     n[i].infNFe.emit.enderEmit.xLgr.valor    = line.pop()
-                    n[i].infNFe.emit.enderEmit.nro.valor     = line.pop() + '_'
+                    n[i].infNFe.emit.enderEmit.nro.valor     = line.pop() #+ '_'
                     n[i].infNFe.emit.enderEmit.xCpl.valor    = line.pop()
                     n[i].infNFe.emit.enderEmit.xBairro.valor = line.pop()
                     n[i].infNFe.emit.enderEmit.cMun.valor    = line.pop()
@@ -135,7 +135,7 @@ class NFeSP(object):
                     n[i].infNFe.dest.CPF.valor   = line.pop()
                 elif grupo == 'E05':
                     n[i].infNFe.dest.enderDest.xLgr.valor    = line.pop()
-                    n[i].infNFe.dest.enderDest.nro.valor     = line.pop() + '_'
+                    n[i].infNFe.dest.enderDest.nro.valor     = line.pop() #+ '_'
                     n[i].infNFe.dest.enderDest.xCpl.valor    = line.pop()
                     n[i].infNFe.dest.enderDest.xBairro.valor = line.pop()
                     n[i].infNFe.dest.enderDest.cMun.valor    = line.pop()
