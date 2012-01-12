@@ -44,9 +44,10 @@ class Odf(object):
     produto_fields = ['A35', 'C35', 'J35', 'K35', 'L35', 'M35', 'N35', 'P35',
                       'R35', 'T35', 'U35', 'V35', 'W35', 'X35', 'Y35', 'Z35']
 
-    def __init__(self, xml_path=None, template_prefix=None, orientation='1', logo=u'', prefix=u''):
+    def __init__(self, xml_path=None, template_prefix=None, output=u'', orientation='1', logo=u'', prefix=u''):
         self.xml_path = xml_path
         self.template_prefix = template_prefix
+        self.output = output
         self.orientation = orientation
         self.logo = logo
         self.prefix = prefix
@@ -90,10 +91,13 @@ class Odf(object):
             return result_list[0].text
 
     def setTemplate(self):
+        if self.output == u'':
+            self.output = self.nfe_id + '.ods'
+
         if os.path.exists(self.template_path):
-            self.tmp_path = os.path.join(os.environ['TMPDIR'], self.nfe_id + '.ods')
-            shutil.copyfile( self.template_path, self.tmp_path)
-            self.danfe = odf_get_document(self.tmp_path)
+            self.tmp_path = os.path.join(os.environ['TMPDIR'], self.output.replace('.pdf', '.ods'))
+            shutil.copyfile( self.template_path, self.output.replace('.pdf', '.ods'))
+            self.danfe = odf_get_document(self.output)
         else:
             print self.template_path
             raise OdfTemplateNotFound
@@ -168,7 +172,7 @@ class Odf(object):
         danfe.get_frame_list()[0].set_attribute('table:end-y', '2.10cm')
         danfe.get_frame_list()[0].set_attribute('svg:width', '5.20cm')
         danfe.get_frame_list()[0].set_attribute('svg:height', '2.10cm')
-        print danfe.get_frame_list()[0].get_attributes()
+        #print danfe.get_frame_list()[0].get_attributes()
 
         # Put the barcode
         x, y, c = danfe.get_cells(content=u'danfe.xBarcode')[0]

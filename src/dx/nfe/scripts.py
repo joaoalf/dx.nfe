@@ -410,6 +410,11 @@ def dxdanfe():
         type=u'string',
         action=u'store',
         help=u"""1 - Retato / 2 - Paisagem""")
+    parser.add_option(u'-s',
+        u'--saida',
+        type=u'string',
+        action=u'store',
+        help=u"""Arquivo de saida""")
 
     opts, args = parser.parse_args()
 
@@ -429,11 +434,14 @@ def dxdanfe():
         if not opts.logo:
             opts.logo = config.get(u'danfe', u'logo')
 
+        if not opts.saida:
+            opts.logo = config.get(u'danfe', u'saida')
+
     except (ConfigParser.NoOptionError, ValueError):
         parser.print_help()
         sys.exit(-1)
 
     del config
 
-    App = dx.nfe.danfe.Odf(opts.xml, opts.template, opts.orientacao, opts.logo, opts.prefixo)
+    App = dx.nfe.danfe.Odf(opts.xml, opts.template, opts.saida, opts.orientacao, opts.logo, opts.prefixo)
     App.main()
