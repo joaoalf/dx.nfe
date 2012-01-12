@@ -92,10 +92,10 @@ class DX_NFE(object):
             with codecs.open(self.status, 'w', 'utf-8') as status:
                 fields = [processo.resposta.cStat.valor, processo.resposta.xMotivo.valor]
                 if processo.resposta.cStat.valor in (u'100', u'110'):
-                    fields.append(processo.resposta.protNFe.infProt.dhRecbto.valor)
+                    fields.append(processo.resposta.protNFe.infProt.dhRecbto.valor.strftime('%c'))
                     fields.append(processo.resposta.protNFe.infProt.nProt.valor)
                 elif processo.resposta.cStat.valor == u'101':
-                    fields.append(processo.resposta.retCancNFe.infCanc.dhRecbto.valor)
+                    fields.append(processo.resposta.retCancNFe.infCanc.dhRecbto.valor.strftime('%c'))
                     fields.append(processo.resposta.retCancNFe.infCanc.nProt.valor)
 
                 status.write(u'|'.join(fields))
