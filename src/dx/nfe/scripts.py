@@ -409,7 +409,7 @@ def dxdanfe():
         u'--orientacao',
         type=u'string',
         action=u'store',
-        help=u"""0 - Retato / 1 - Paisagem""")
+        help=u"""1 - Retato / 2 - Paisagem""")
 
     opts, args = parser.parse_args()
 
