@@ -108,7 +108,7 @@ class DX_NFE(object):
             if processo1.resposta.cStat.valor in (u'100', u'110'):
                 fields.append(processo1.resposta.protNFe.infProt.nProt.valor)
             elif processo1.resposta.cStat.valor == u'101':
-                fields.append(processo1.resposta.retCancNFe.dhRecbto.valor.strftime('%c'))
+                fields.append(processo1.resposta.retCancNFe.infCanc.dhRecbto.valor.strftime('%c'))
                 fields.append(processo1.resposta.retCancNFe.infCanc.nProt.valor)
 
             with codecs.open(self.status, 'a', 'utf-8') as status:
