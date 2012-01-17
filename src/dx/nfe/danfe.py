@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 __author__ = 'joaoalf'
 
-import os, shutil, re
+import os, shutil, re, decimal, datetime
 import lxml.etree as ET
 from lpod.frame import odf_create_image_frame
 from lpod.document import odf_get_document
@@ -62,8 +62,9 @@ class Odf(object):
         self.nfe_id = self.getNfeId()
         self.setTemplate()
         self.fillDANFE()
-        shutil.copyfile(self.tmp_path, os.path.join(self.prefix, self.nfe_id + '.ods'))
+        shutil.copyfile(self.tmp_path, os.path.join(self.prefix, self.output.replace('.pdf', '.ods')))
         os.unlink(self.tmp_path)
+        self.convertToPdf()
 
     def loadXmlFromFile(self):
         if os.path.exists(self.xml_path):
@@ -96,8 +97,8 @@ class Odf(object):
 
         if os.path.exists(self.template_path):
             self.tmp_path = os.path.join(os.environ['TMPDIR'], self.output.replace('.pdf', '.ods'))
-            shutil.copyfile( self.template_path, self.output.replace('.pdf', '.ods'))
-            self.danfe = odf_get_document(self.output)
+            shutil.copyfile( self.template_path, self.tmp_path)
+            self.danfe = odf_get_document(self.tmp_path)
         else:
             print self.template_path
             raise OdfTemplateNotFound
@@ -126,14 +127,62 @@ class Odf(object):
         #print help(danfe)
         #infNFe = self.xml_tree.xpath('//ns:infNFe', namespaces={'ns': self._namespace})[0]
         #print dir(infNFe)
+        print dir(self.xml_tree)
         for n in self.xml_tree.iter():
             #print n
+            if n.tag.find(self._namespace) == -1:
+                continue
+
             try:
                 danfe_key = u'.'.join([
                     n.getparent().tag.replace('{'+self._namespace+'}', ''),
                     n.tag.replace('{'+self._namespace+'}', '')]
                 )
-                danfe_value = n.text
+
+                if re.search('[.][vqp][A-Z]', danfe_key):
+                    print danfe_key, n.text
+                    try:
+                        danfe_value = decimal.Decimal(n.text)
+                    except decimal.InvalidOperation:
+                        danfe_value = None
+                    #print danfe_key, danfe_value
+                elif re.search('[.][d][A-Z]', danfe_key):
+                    print danfe_key, n.text
+                    try:
+                        danfe_value = datetime.datetime.strptime(n.text, '%Y-%m-%d')
+                    except:
+                        raise
+                elif danfe_key.find('nNF') != -1:
+                    danfe_value = int(n.text)
+                elif danfe_key.find('CEP') != -1:
+                    danfe_value = n.text[:5] + '-' + n.text[5:]
+                elif danfe_key.find('CNPJ') != -1:
+                    danfe_value = n.text[:2] + '.' +\
+                                  n.text[2:5] + '.' +\
+                                  n.text[5:8] + '/' +\
+                                  n.text[8:12] + '-' + n.text[12:]
+
+                elif danfe_key.find('CPF') != -1:
+                    danfe_value = n.text[:3] + '.' +\
+                                  n.text[3:6] + '.' +\
+                                  n.text[6:9] + '-' +\
+                                  n.text[9:]
+
+                elif danfe_key.find('chNFe') != -1:
+                    danfe_value = n.text[:4] + '.' +\
+                                  n.text[4:8] + '.' +\
+                                  n.text[8:12] + '.' +\
+                                  n.text[12:16] + '.' +\
+                                  n.text[16:20] + '.' +\
+                                  n.text[20:24] + '.' +\
+                                  n.text[24:28] + '.' +\
+                                  n.text[28:32] + '.' +\
+                                  n.text[32:36] + '.' +\
+                                  n.text[36:40] + '.' +\
+                                  n.text[40:]
+
+                else:
+                    danfe_value = n.text
                 #print danfe_key
             except AttributeError:
                 danfe_key = None
@@ -142,13 +191,17 @@ class Odf(object):
                 if re.search('ICMS[0-9][0-9]\.', danfe_key):
                     danfe_key = danfe_key[:4] + danfe_key[6:]
                     #print danfe_key
-
+                #print danfe_key
                 for x, y, c in danfe.get_cells(content=u'%%'+danfe_key+u'%%'):
                     #print c.get_type(), c.get_value()
-                    c.set_value(c.get_value().replace(u'%%'+danfe_key+u'%%', danfe_value))
+                    if isinstance(danfe_value, str) or isinstance(danfe_value, unicode):
+                        c.set_value(c.get_value().replace(u'%%'+danfe_key+u'%%', danfe_value))
+                    else:
+                        c.set_value(danfe_value)
+
                     danfe.set_cell((x, y), c)
-                    if danfe_key.find('prod') != -1 or danfe_key.find('ICMS') !=1:
-                        break
+                    #if danfe_key.find('prod') != -1 or danfe_key.find('ICMS') !=1:
+                    break
 
         # Put the logo
         x, y, c = danfe.get_cells(content=u'danfe.xLogo')[0]
@@ -157,7 +210,7 @@ class Odf(object):
         frame = odf_create_image_frame(
             logo_uri,
             size=('5.20cm', '2.10cm'),
-            position=('0.03cm', '0.03cm')
+            position=('0cm', '0cm')
         )
 
 
@@ -182,14 +235,14 @@ class Odf(object):
 
         frame = odf_create_image_frame(
             barcode_uri,
-            size=('9.45cm', '0.85cm'),
-            position=('0.0cm', '0.05cm')
+            size=('9.35cm', '0.85cm'),
+            position=('0cm', '0cm')
         )
 
         danfe.set_cell_image((x, y), frame, type=self.danfe.get_type())
         danfe.get_frame_list()[1].set_attribute('table:end-cell-address', 'Paisagem.Z3')
 
-        # Clean the other fields
+        # Clean the unused fields
         for x, y, c in danfe.get_cells(content=u'%%'):
             regex = re.search('%%.*%%', c.get_value())
             c.set_value(c.get_value().replace(regex.group(0), u''))
@@ -200,4 +253,5 @@ class Odf(object):
         os.unlink(self.nfe_id + '.png')
 
 
-    
+    def convertToPdf(self):
+        pass
