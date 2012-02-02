@@ -24,5 +24,6 @@ setup(
                       'lxml',
                       'PySPED',
                       'libxml2-python',
-                      'lpod-python',],
+                      'lpod-python',
+                      'py3o.renderclient'],
 )

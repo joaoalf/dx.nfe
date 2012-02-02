@@ -415,6 +415,16 @@ def dxdanfe():
         type=u'string',
         action=u'store',
         help=u"""Arquivo de saida""")
+    parser.add_option(u'-H',
+        u'--host',
+        type=u'string',
+        action=u'store',
+        help=u"""Servidor de renderizacao de PDF""")
+    parser.add_option(u'-P',
+        u'--port',
+        type=u'string',
+        action=u'store',
+        help=u"""Porta do servidor de renderizacao de PDF""")
 
     opts, args = parser.parse_args()
 
@@ -437,11 +447,35 @@ def dxdanfe():
         if not opts.saida:
             opts.logo = config.get(u'danfe', u'saida')
 
-    except (ConfigParser.NoOptionError, ValueError):
+        if not opts.orientacao:
+            opts.orientacao = config.get(u'danfe', u'orientacao')
+
+        if not opts.prefixo:
+            opts.prefixo = config.get(u'danfe', u'prefixo')
+
+        if not opts.host:
+            opts.host = config.get(u'danfe', u'host')
+
+        if not opts.port:
+            opts.port = config.get(u'danfe', u'port')
+
+    except ConfigParser.NoOptionError as e:
         parser.print_help()
+        print
+        print 'Parametro faltando: --%s' % e.option
         sys.exit(-1)
+
+    except ValueError:
+        raise
 
     del config
 
-    App = dx.nfe.danfe.Odf(opts.xml, opts.template, opts.saida, opts.orientacao, opts.logo, opts.prefixo)
+    App = dx.nfe.danfe.Odf(
+        opts.xml,
+        opts.template,
+        opts.saida,
+        opts.orientacao,
+        opts.logo,
+        opts.prefixo
+    )
     App.main()
