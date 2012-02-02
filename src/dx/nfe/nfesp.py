@@ -1,10 +1,18 @@
 # -*- coding: utf-8 -*-
 from zope.interface import implements
-from zope.component import adapts
-from interfaces import INFeXml, INFeDataSource
+#from zope.component import adapts
+from interfaces import INFeDataSource
 from datetime import datetime
 from pysped.nfe.manual_401 import NFe_200, Det_200, Vol_200, Lacres_200, Dup_200
-from pysped.nfe.manual_300 import NFe_110, Det_110
+from pysped.nfe.manual_300 import NFe_110
+
+class GroupNotImplemented(Exception):
+    def __init__(self, group):
+        Exception.__init__(self)
+        self.group = group
+
+    def __str__(self):
+        print "Group %s is not implemented!" % self.group
 
 class NFeSP(object):
     implements(INFeDataSource)
@@ -26,6 +34,8 @@ class NFeSP(object):
         d = []
         n = []
         i = -1
+        d1 = None
+        line = None
         #nota_atual = -1
 
         for l in self.txt.readlines():
@@ -41,9 +51,9 @@ class NFeSP(object):
                     
                 #print grupo
                 if grupo == 'NOTA FISCAL':
-                    num = int(line.pop())
-                    i = i + 1
-                    nota_atual = i
+                    #num = int(line.pop())
+                    i += 1
+                    #nota_atual = i
                 elif grupo == 'A':
                     versao = line.pop()
                     #print versao
@@ -117,7 +127,7 @@ class NFeSP(object):
                     n[i].infNFe.emit.enderEmit.xPais.valor   = line.pop()
                     n[i].infNFe.emit.enderEmit.fone.valor    = line.pop()
                 elif grupo == 'D':
-                    raise GroupNotImplementd(grupo)
+                    raise GroupNotImplemented(grupo)
                     #
                     # Regime tributário
                     #
@@ -215,27 +225,27 @@ class NFeSP(object):
                     d1.prod.DI.cExportador.valor = line.pop()
                     #d1.prod.genero.valor   = line.pop()
                 elif grupo == 'I25':
-                    d1.prod.adi.nAdicao.valor     = line.pop()
-                    d1.prod.adi.nSeqAdic.valor    = line.pop()
-                    d1.prod.adi.cFabricante.valor = line.pop()
-                    d1.prod.adi.vDescDI.valor     = line.pop()
+                    d1.prod.DI.adi.nAdicao.valor     = line.pop()
+                    d1.prod.DI.adi.nSeqAdic.valor    = line.pop()
+                    d1.prod.DI.adi.cFabricante.valor = line.pop()
+                    d1.prod.DI.adi.vDescDI.valor     = line.pop()
                     #d1.prod.adi.cExportador.valor = line.pop()
                 elif grupo == 'J':
-                    raise GroupNotImplementd(grupo)
+                    raise GroupNotImplemented(grupo)
                 elif grupo == 'K':
-                    raise GroupNotImplementd(grupo)
+                    raise GroupNotImplemented(grupo)
                 elif grupo == 'L':
-                    raise GroupNotImplementd(grupo)
+                    raise GroupNotImplemented(grupo)
                 elif grupo == 'L01':
-                    raise GroupNotImplementd(grupo)
+                    raise GroupNotImplemented(grupo)
                 elif grupo == 'L105':
-                    raise GroupNotImplementd(grupo)
+                    raise GroupNotImplemented(grupo)
                 elif grupo == 'L109':
-                    raise GroupNotImplementd(grupo)
+                    raise GroupNotImplemented(grupo)
                 elif grupo == 'L114':
-                    raise GroupNotImplementd(grupo)
+                    raise GroupNotImplemented(grupo)
                 elif grupo == 'L117':
-                    raise GroupNotImplementd(grupo)
+                    raise GroupNotImplemented(grupo)
                 #
                 # Impostos
                 #
@@ -275,7 +285,7 @@ class NFeSP(object):
                     d1.imposto.ICMS.orig.valor     = line.pop()
                     d1.imposto.ICMS.CST.valor      = line.pop()
                     d1.imposto.ICMS.modBCST.valor  = line.pop()
-                    d1.imposto.ICMS.pVMAST.valor   = line.pop()
+                    d1.imposto.ICMS.pMVAST.valor   = line.pop()
                     d1.imposto.ICMS.pRedBCST.valor = line.pop()
                     d1.imposto.ICMS.vBCST.valor    = line.pop()
                     d1.imposto.ICMS.pICMSST.valor  = line.pop()
@@ -333,7 +343,7 @@ class NFeSP(object):
                     #d1.imposto.IPI.vIPI.valor   = u'100.00'
                 elif grupo == 'O07':
                     d1.imposto.IPI.CST.valor  = line.pop()
-                    d1.imposto.IPI.VIPI.valor = line.pop()
+                    d1.imposto.IPI.vIPI.valor = line.pop()
                 elif grupo == 'O08':
                     d1.imposto.IPI.CST.valor = line.pop()
                 elif grupo == 'O10':
@@ -343,7 +353,7 @@ class NFeSP(object):
                     d1.imposto.IPI.qUnid.valor = line.pop()
                     d1.imposto.IPI.vUnid.valor = line.pop()
                 elif grupo == 'P':
-                    raise GroupNotImplementd(grupo)
+                    raise GroupNotImplemented(grupo)
                 elif grupo == 'Q':
                     pass
                 elif grupo == 'Q02':
@@ -353,8 +363,8 @@ class NFeSP(object):
                     d1.imposto.PIS.vPIS.valor = line.pop()
                 elif grupo == 'Q03':
                     d1.imposto.PIS.CST.valor       = line.pop()
-                    d1.imposto.PIS.vBCProd.valor   = line.pop()
-                    d1.imposto.PIS.pAliqProd.valor = line.pop()
+                    d1.imposto.PIS.qBCProd.valor   = line.pop()
+                    d1.imposto.PIS.vAliqProd.valor = line.pop()
                     d1.imposto.PIS.vPIS.valor      = line.pop()
                 elif grupo == 'Q04':
                     d1.imposto.PIS.CST.valor = line.pop()
@@ -368,7 +378,7 @@ class NFeSP(object):
                     d1.imposto.PIS.qBCProd.valor   = line.pop()
                     d1.imposto.PIS.vAliqProd.valor = line.pop()
                 elif grupo == 'R':
-                    d1.imposto.PISST.vPis.valor  = line.pop()
+                    d1.imposto.PISST.vPIS.valor  = line.pop()
                 elif grupo == 'R02':
                     d1.imposto.PIS.vBC.valor  = line.pop()
                     d1.imposto.PIS.pPIS.valor = line.pop()
@@ -399,7 +409,7 @@ class NFeSP(object):
                     d1.imposto.COFINS.qBCProd.valor   = line.pop()
                     d1.imposto.COFINS.vAliqProd.valor = line.pop()
                 elif grupo == 'T':
-                    d1.imposto.COFINSST.vCofins.valor = line.pop()
+                    d1.imposto.COFINSST.vCOFINS.valor = line.pop()
                 elif grupo == 'T02':
                     d1.imposto.COFINSST.vBC.valor     = line.pop()
                     d1.imposto.COFINSST.pCOFINS.valor = line.pop()
@@ -516,9 +526,9 @@ class NFeSP(object):
                     n[i].infNFe.infAdic.procRef.nProc.valor   = line.pop()
                     n[i].infNFe.infAdic.procRef.indProc.valor = line.pop()
                 elif grupo == 'ZA':
-                    raise GroupNotImplementd(grupo)
+                    raise GroupNotImplemented(grupo)
                 elif grupo == 'ZB':
-                    raise GroupNotImplementd(grupo)
+                    raise GroupNotImplemented(grupo)
 
             except TypeError:
                 print line
@@ -528,8 +538,8 @@ class NFeSP(object):
         self.nfs = n
                 
     def validate(self):
-        for line in self.txt:
-            pass
+        #for line in self.txt:
+        #    pass
         return True
     
     

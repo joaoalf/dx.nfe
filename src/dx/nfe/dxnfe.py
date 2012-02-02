@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-import sys, os, codecs
-import interfaces
+import os, codecs
+#import interfaces
 from nfesp import NFeSP
 from pysped.nfe.processador_nfe import ProcessadorNFe
 

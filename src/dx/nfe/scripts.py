@@ -7,7 +7,7 @@ CONF_FILE = ['./dxnfe.cfg',
 def dxgetdata():
     """Get tags from a xml file
     """
-    import sys
+    #import sys
     import ConfigParser
     from optparse import OptionParser
     import dx.nfe.getdata
@@ -51,7 +51,7 @@ def dxgetdata():
     except (ConfigParser.NoOptionError, ValueError):
         parser.print_help()
         raise
-        sys.exit(-1)
+        #sys.exit(-1)
 
     App = dx.nfe.getdata.GetData(opts.xml, opts.tags.split(), opts.first_only)
     App.main()
@@ -73,61 +73,72 @@ def dxnfe():
     ##
 
     parser = OptionParser(usage=u"""%prog [options]""")
-    parser.add_option(u'-c',
-                      u'--config',
-                      type=u'string',
-                      action=u'store',
-                      help=u"""Configration file""")
-    parser.add_option(u'-u',
-                      u'--uf',
-                      type=u'string',
-                      action=u'store',
-                      help=u"""Unidade Federativa""")
-    parser.add_option(u'-s',
-                      u'--status',
-                      type=u'string',
-                      action=u'store',
-                      help=u"""Arquivo de status""")
-    parser.add_option(u'-m',
-                      u'--modo',
-                      type=u'string',
-                      action=u'store',
-                      help=u"""Modo de operacao: [ EMISSAO | STATUSE | STATUSS | CANCELAMENTO | INUTILIZACAO ]""")
-    parser.add_option(u'-n',
-                      u'--nfe',
-                      type=u'string',
-                      action=u'store',
-                      help=u"""Arquivo de NFE""")    
-    parser.add_option(u'-p',
-                      u'--prefixo',
-                      type=u'string',
-                      action=u'store',
-                      help=u"""Prefixo da geração dos arquivos""")
-    parser.add_option(u'-x',
-                      u'--xml',
-                      type=u'string',
-                      action=u'store',
-                      help=u"""Arquivo XML""")
-    parser.add_option(u'-d',
-                      u'--danfe',
-                      type=u'string',
-                      action=u'store',
-                      help=u"""Arquivo DANFE""")    
-    parser.add_option(u'-k',
-                      u'--chave',
-                      type=u'string',
-                      action=u'store',
-                      help=u"""Chave da NFE""")    
-    parser.add_option(u'-t',
-                      u'--tipo',
-                      type=u'string',
-                      action=u'store',
-                      help=u"""Formato do arquivo de entrada""")
-    parser.add_option(u'-j',
-                      u'--justificativa',
-                      type=u'string',
-                      action=u'store',
-                      help=u"""Arquivo contendo a justificativa para cancelamento""")
+    parser.add_option(
+        u'-c',
+        u'--config',
+        type=u'string',
+        action=u'store',
+        help=u"""Configration file""")
+    parser.add_option(
+        u'-u',
+        u'--uf',
+        type=u'string',
+        action=u'store',
+        help=u"""Unidade Federativa""")
+    parser.add_option(
+        u'-s',
+        u'--status',
+        type=u'string',
+        action=u'store',
+        help=u"""Arquivo de status""")
+    parser.add_option(
+        u'-m',
+        u'--modo',
+        type=u'string',
+        action=u'store',
+        help=u"""Modo de operacao: [ EMISSAO | STATUSE | STATUSS | CANCELAMENTO | INUTILIZACAO ]""")
+    parser.add_option(
+        u'-n',
+        u'--nfe',
+        type=u'string',
+        action=u'store',
+        help=u"""Arquivo de NFE""")
+    parser.add_option(
+        u'-p',
+        u'--prefixo',
+        type=u'string',
+        action=u'store',
+        help=u"""Prefixo da geração dos arquivos""")
+    parser.add_option(
+        u'-x',
+        u'--xml',
+        type=u'string',
+        action=u'store',
+        help=u"""Arquivo XML""")
+    parser.add_option(
+        u'-d',
+        u'--danfe',
+        type=u'string',
+        action=u'store',
+        help=u"""Arquivo DANFE""")
+    parser.add_option(
+        u'-k',
+        u'--chave',
+        type=u'string',
+        action=u'store',
+        help=u"""Chave da NFE""")
+    parser.add_option(
+        u'-t',
+        u'--tipo',
+        type=u'string',
+        action=u'store',
+        help=u"""Formato do arquivo de entrada""")
+    parser.add_option(
+        u'-j',
+        u'--justificativa',
+        type=u'string',
+        action=u'store',
+        help=u"""Arquivo contendo a justificativa para cancelamento""")
     parser.add_option(
         u'-C',
         u'--cnpj',
@@ -164,182 +175,81 @@ def dxnfe():
     try:
         if not opts.status:
             opts.status = config.get(u'main', u'status')
-    except (ConfigParser.NoOptionError, ConfigParser.NoSectionError, ValueError):
-        parser.print_help()
-        print "Parametro incorreto: -s ", opts.status
-        sys.exit(-1)
 
-    try:
         if not opts.uf:
             opts.uf = config.get(u'main', u'uf')
+        opts.cert = config.get(u'main', u'cert')
+        opts.cert_pw = config.get(u'main', u'senha')
+        opts.versao = config.get(u'main', u'versao')
+        opts.ambiente = config.get(u'main', u'ambiente')
+        opts.logo = config.get(u'main', u'logo')
 
-    except (ConfigParser.NoOptionError, ConfigParser.NoSectionError, ValueError):
-        parser.print_help()
-        print "Parametro incorreto: -u ", opts.uf
-        sys.exit(-1)
-
-
-        #if not opts.cert:
-    opts.cert = config.get(u'main', u'cert')
-    opts.cert_pw = config.get(u'main', u'senha')
-    opts.versao = config.get(u'main', u'versao')
-    opts.ambiente = config.get(u'main', u'ambiente')
-    opts.logo = config.get(u'main', u'logo')
-
-    try:
         if not opts.modo:
             opts.modo = config.get(u'main', u'modo')
 
-    except (ConfigParser.NoOptionError, ConfigParser.NoSectionError, ValueError):
-        parser.print_help()
-        print "Parametro incorreto: -m ", opts.modo
-        sys.exit(-1)
-
-    if opts.modo == u'EMISSAO' or opts.modo == u'emissao':
-        try:
+        elif opts.modo == u'EMISSAO' or opts.modo == u'emissao':
             if not opts.nfe:
                 opts.nfe = config.get(u'main', u'nfe')
 
-        except (ConfigParser.NoOptionError, ConfigParser.NoSectionError, ValueError):
-            parser.print_help()
-            print "Parametro incorreto: -n ", opts.nfe
-            sys.exit(-1)
-
-        try:
             if not opts.prefixo:
                 opts.xml = config.get(u'main', u'prefixo')
 
-        except (ConfigParser.NoOptionError, ConfigParser.NoSectionError, ValueError):
-            parser.print_help()
-            print "Parametro incorreto: -p ", opts.prefixo
-            sys.exit(-1)
-
-        try:
             if not opts.tipo:
                 opts.tipo = config.get(u'main', u'tipo')
 
-        except (ConfigParser.NoOptionError, ConfigParser.NoSectionError, ValueError):
-            parser.print_help()
-            print "Parametro incorreto: -t ", opts.tipo
-            sys.exit(-1)
-
-    elif opts.modo == u'CANCELAMENTO' or opts.modo == u'cancelamento':
-        try:
+        elif opts.modo == u'CANCELAMENTO' or opts.modo == u'cancelamento':
             if not opts.chave:
-                raise ValueError
+                raise ConfigParser.NoOptionError('chave', 'main')
 
-        except (ConfigParser.NoOptionError, ConfigParser.NoSectionError, ValueError):
-            parser.print_help()
-            print "Parametro incorreto: -k ", opts.chave
-            sys.exit(-1)
-
-        try:
             if not opts.justificativa:
-                raise ValueError
+                raise ConfigParser.NoOptionError('justificativa', 'main')
 
-        except (ConfigParser.NoOptionError, ConfigParser.NoSectionError, ValueError):
-            parser.print_help()
-            print "Parametro incorreto: -j ", opts.justificativa
-            sys.exit(-1)
-
-        try:
             if not opts.prefixo:
-                raise ValueError
+                raise ConfigParser.NoOptionError('prefixo', 'main')
 
-        except (ConfigParser.NoOptionError, ConfigParser.NoSectionError, ValueError):
-            parser.print_help()
-            print "Parametro incorreto: -p ", opts.prefixo
-            sys.exit(-1)
-
-    elif opts.modo == u'STATUSS' or opts.modo == u'statuss':
-
-        try:
+        elif opts.modo == u'STATUSS' or opts.modo == u'statuss':
             if not opts.prefixo:
-                raise ValueError
+                raise ConfigParser.NoOptionError('prefixo', 'main')
 
-        except (ConfigParser.NoOptionError, ConfigParser.NoSectionError, ValueError):
-            parser.print_help()
-            print "Parametro incorreto: -p ", opts.prefixo
-            sys.exit(-1)
-
-    elif opts.modo == u'STATUSE' or opts.modo == u'statuse':
-        try:
+        elif opts.modo == u'STATUSE' or opts.modo == u'statuse':
             if not opts.chave:
-                raise ValueError
+                raise ConfigParser.NoOptionError('chave', 'main')
 
-        except (ConfigParser.NoOptionError, ConfigParser.NoSectionError, ValueError):
-            parser.print_help()
-            print "Parametro incorreto: -k ", opts.chave
-            sys.exit(-1)
+            if not opts.prefixo:
+                raise ConfigParser.NoOptionError('prefixo', 'main')
 
-    elif opts.modo == u'INUTILIZACAO' or opts.modo == u'inutilizacao':
-        try:
+        elif opts.modo == u'INUTILIZACAO' or opts.modo == u'inutilizacao':
             if not opts.cnpj:
-                raise ValueError
+                raise ConfigParser.NoOptionError('cnpj', 'main')
 
-        except (ConfigParser.NoOptionError, ConfigParser.NoSectionError, ValueError):
-            parser.print_help()
-            print "Parametro incorreto: -C ", opts.cnpj
-            sys.exit(-1)
-
-        try:
             if not opts.serie:
-                raise ValueError
+                raise ConfigParser.NoOptionError('serie', 'main')
 
-        except (ConfigParser.NoOptionError, ConfigParser.NoSectionError, ValueError):
-            parser.print_help()
-            print "Parametro incorreto: -S ", opts.serie
-            sys.exit(-1)
-
-        try:
             if not opts.numero_inicial:
-                raise ValueError
+                raise ConfigParser.NoOptionError('numero_inicial', 'main')
 
-        except (ConfigParser.NoOptionError, ConfigParser.NoSectionError, ValueError):
-            parser.print_help()
-            print "Parametro incorreto: -b ", opts.numero_inicial
-            sys.exit(-1)
-
-        try:
             if not opts.numero_final:
-                raise ValueError
+                raise ConfigParser.NoOptionError('numero_final', 'main')
 
-        except (ConfigParser.NoOptionError, ConfigParser.NoSectionError, ValueError):
-            parser.print_help()
-            print "Parametro incorreto: -e ", opts.numero_final
-            sys.exit(-1)
-
-        try:
-            if not opts.numero_final:
-                raise ValueError
-
-        except (ConfigParser.NoOptionError, ConfigParser.NoSectionError, ValueError):
-            parser.print_help()
-            print "Parametro incorreto: -j ", opts.justificativa
-            sys.exit(-1)
-
-        try:
             if not opts.prefixo:
-                raise ValueError
+                raise ConfigParser.NoOptionError('prefixo', 'main')
 
-        except (ConfigParser.NoOptionError, ConfigParser.NoSectionError, ValueError):
-            parser.print_help()
-            print "Parametro incorreto: -p ", opts.prefixo
-            sys.exit(-1)
-
-        try:
             if not opts.justificativa:
-                raise ValueError
+                raise ConfigParser.NoOptionError('justificativa', 'main')
 
-        except (ConfigParser.NoOptionError, ConfigParser.NoSectionError, ValueError):
+        else:
             parser.print_help()
-            print "Parametro incorreto: -j ", opts.justificativa
+            print u"Parametro incorreto: -m ", opts.modo
             sys.exit(-1)
 
-    else:
+    except ConfigParser.NoOptionError as e:
         parser.print_help()
-        print u"Parametro incorreto: -m ", opts.modo
+        print
+        print 'Parametro faltando: --%s' % e.option
         sys.exit(-1)
+
+    except ValueError:
+        raise
 
     del config
 #except (ConfigParser.NoOptionError, ConfigParser.NoSectionError, ValueError):
