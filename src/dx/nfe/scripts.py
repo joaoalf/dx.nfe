@@ -7,7 +7,7 @@ CONF_FILE = ['./dxnfe.cfg',
 def dxgetdata():
     """Get tags from a xml file
     """
-    #import sys
+    import sys
     import ConfigParser
     from optparse import OptionParser
     import dx.nfe.getdata
@@ -17,17 +17,17 @@ def dxgetdata():
                       u'--config',
                       type=u'string',
                       action=u'store',
-                      help=u"""Configration file""")
+                      help=u"""Arquivo de configuracao""")
     parser.add_option(u'-x',
                       u'--xml',
                       type=u'string',
                       action=u'store',
-                      help=u"""Xml file""")
+                      help=u"""Arquivo XML""")
     parser.add_option(u'-f',
                       u'--first-only',
                       dest=u'first_only',
                       action=u'store_true',
-                      help=u"""Return only the first element found""")
+                      help=u"""Retorna apenas a primeira instancia de cada tag""")
 
     opts, args = parser.parse_args()
 
@@ -41,6 +41,7 @@ def dxgetdata():
         opts.tags = config.get(u'getdata', u'tags')
         if not opts.xml:
             opts.xml = config.get(u'getdata', u'xml')
+
         if not opts.first_only:
             if config.get(u'getdata', u'primeiro') == '0':
                 opts.first_only = False
@@ -48,10 +49,12 @@ def dxgetdata():
                 opts.first_only = True
         
         del config
-    except (ConfigParser.NoOptionError, ValueError):
+
+    except ConfigParser.NoOptionError as e:
         parser.print_help()
-        raise
-        #sys.exit(-1)
+        print
+        print 'Parametro faltando: --%s' % e.option
+        sys.exit(-1)
 
     App = dx.nfe.getdata.GetData(opts.xml, opts.tags.split(), opts.first_only)
     App.main()
