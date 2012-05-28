@@ -6,9 +6,11 @@ import lxml.etree as ET
 from lpod.frame import odf_create_image_frame
 from lpod.document import odf_get_document
 import code128
+from py3o.renderclient import RenderClient
 
 class OdfTemplateNotFound(Exception):
     def __init__(self, value=None):
+        Exception.__init__(self)
         self.value = value
 
     def __str__(self):
@@ -16,6 +18,7 @@ class OdfTemplateNotFound(Exception):
 
 class XmlNfeNotFound(Exception):
     def __init__(self, value=None):
+        Exception.__init__(self)
         self.value = value
 
     def __str__(self):
@@ -44,24 +47,32 @@ class Odf(object):
     produto_fields = ['A35', 'C35', 'J35', 'K35', 'L35', 'M35', 'N35', 'P35',
                       'R35', 'T35', 'U35', 'V35', 'W35', 'X35', 'Y35', 'Z35']
 
-    def __init__(self, xml_path=None, template_prefix=None, output=u'', orientation='1', logo=u'', prefix=u''):
+    def __init__(self,
+                 xml_path=None,
+                 template_prefix=None,
+                 output=u'',
+                 orientation=u'1',
+                 logo=u'',
+                 server=('127.0.0.1', 8994),
+                 prefix=u''):
         self.xml_path = xml_path
         self.template_prefix = template_prefix
         self.output = output
         self.orientation = orientation
         self.logo = logo
+        self.server = server
         self.prefix = prefix
         self.nfe_id = None
         self.template_path = os.path.join(
             self.template_prefix,
-            'DanfeTemplate' + self.orientation + '.ods'
+            u'DanfeTemplate' + unicode(self.orientation) + u'.ods'
         )
 
     def main(self):
         self.loadXmlFromFile()
         self.nfe_id = self.getNfeId()
         self.setTemplate()
-        self.fillDANFE()
+        #self.fillDANFE()
         shutil.copyfile(self.tmp_path, os.path.join(self.prefix, self.output.replace('.pdf', '.ods')))
         os.unlink(self.tmp_path)
         self.convertToPdf()
@@ -109,7 +120,7 @@ class Odf(object):
 
         ## Mensagem
         cell = table.get_cell_list(canhoto_fields[0])[0]
-        canhoto_msg = u'RECEBEMOS DE %s O(S) PRODUTO(S) CONSTANTE(S) DA NOTA FISCAL INDICADA AO LADO' % self.getTag('emit.xnome')
+        canhoto_msg = u'RECEBEMOS DE %s O(S) PRODUTO(S) CONSTANTE(S) DA NOTA FISCAL INDICADA AO LADO' % self.getTagValue('emit.xnome')
         cell.set_cell_value(canhoto_msg)
         table.set_cell(cell.name, cell)
 
@@ -122,12 +133,8 @@ class Odf(object):
     def fillDANFE(self):
         body = self.danfe.get_body()
         danfe = body.get_table_list()[0]
-        #print danfe.get_size()
-        #print dir(danfe)
-        #print help(danfe)
-        #infNFe = self.xml_tree.xpath('//ns:infNFe', namespaces={'ns': self._namespace})[0]
-        #print dir(infNFe)
-        print dir(self.xml_tree)
+        danfe_value = None
+
         for n in self.xml_tree.iter():
             #print n
             if n.tag.find(self._namespace) == -1:
@@ -140,14 +147,12 @@ class Odf(object):
                 )
 
                 if re.search('[.][vqp][A-Z]', danfe_key):
-                    print danfe_key, n.text
                     try:
                         danfe_value = decimal.Decimal(n.text)
                     except decimal.InvalidOperation:
                         danfe_value = None
                     #print danfe_key, danfe_value
                 elif re.search('[.][d][A-Z]', danfe_key):
-                    print danfe_key, n.text
                     try:
                         danfe_value = datetime.datetime.strptime(n.text, '%Y-%m-%d')
                     except:
@@ -254,4 +259,8 @@ class Odf(object):
 
 
     def convertToPdf(self):
-        pass
+        client = RenderClient(self.server)
+        #client.login('toto', 'plouf')
+        print self.output.replace('.pdf', '.ods'), self.output
+
+        client.render(self.output.replace('.pdf', '.ods'), self.output)
