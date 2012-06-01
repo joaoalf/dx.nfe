@@ -259,7 +259,7 @@ class Odf(object):
 
 
     def convertToPdf(self):
-        client = RenderClient(self.server)
+        client = RenderClient(self.server[0], self.server[1])
         #client.login('toto', 'plouf')
         print self.output.replace('.pdf', '.ods'), self.output
 
