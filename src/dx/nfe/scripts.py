@@ -389,7 +389,7 @@ def dxdanfe():
         opts.saida,
         opts.orientacao,
         opts.logo,
-        (opts.host, opts.port),
+        (opts.host, int(opts.port)),
         opts.prefixo
     )
     App.main()
