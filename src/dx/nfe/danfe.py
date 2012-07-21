@@ -72,10 +72,10 @@ class Odf(object):
         self.loadXmlFromFile()
         self.nfe_id = self.getNfeId()
         self.setTemplate()
-        #self.fillDANFE()
+        self.fillDANFE()
         shutil.copyfile(self.tmp_path, os.path.join(self.prefix, self.output.replace('.pdf', '.ods')))
         os.unlink(self.tmp_path)
-        self.convertToPdf()
+        self.convertToPdf2()
 
     def loadXmlFromFile(self):
         if os.path.exists(self.xml_path):
@@ -265,3 +265,27 @@ class Odf(object):
 
         client.render(os.path.join(self.prefix, self.output.replace('.pdf', '.ods')),
                       os.path.join(self.prefix, self.output))
+    def convertToPdf2(self):
+        cmd = 'scp -i /etc/pdfgen.key ' + \
+              os.path.join(self.prefix, self.output.replace('.pdf', '.ods')) + \
+              ' ' + \
+              'pdfgen@10.25.18.5:'
+        print cmd
+        os.system(cmd)
+
+        cmd = 'ssh -i /etc/pdfgen.key ' + \
+              'pdfgen@10.25.18.5 ' + \
+              'unoconv ' + \
+              self.output.replace('.pdf', '.ods')
+        print cmd
+        os.system(cmd)
+
+        cmd = 'scp -i /etc/pdfgen.key ' + \
+              'pdfgen@10.25.18.5:' + \
+              self.output + \
+              ' ' + \
+              os.path.join(self.prefix, self.output)
+        print cmd
+        os.system(cmd)
+        
+        
