@@ -195,7 +195,10 @@ class Odf(object):
                 if re.search('ICMS[0-9][0-9]\.', danfe_key):
                     danfe_key = danfe_key[:4] + danfe_key[6:]
                     #print danfe_key
-                #print danfe_key
+
+                if danfe_key == u'emit.xNome':
+                    xnome = danfe_value
+
                 for x, y, c in danfe.get_cells(content=u'%%'+danfe_key+u'%%'):
                     #print c.get_type(), c.get_value()
                     if isinstance(danfe_value, str) or isinstance(danfe_value, unicode):
@@ -248,8 +251,7 @@ class Odf(object):
 
         # Put the canhoto
         x, y, c = danfe.get_cells(content=u'danfe.xCanhoto')[0]
-        xnome = danfe.get_cells(content=u'%%emit.xNome%%')[0]
-        danfe_value = u'RECEBEMOS DE %s O(S) PRODUTO(S) CONSTANTE(S) DA NOTA FISCAL INDICADA AO LADO' % xnome[2]
+        danfe_value = u'RECEBEMOS DE %s O(S) PRODUTO(S) CONSTANTE(S) DA NOTA FISCAL INDICADA AO LADO' % xnome
         c.set_value(danfe_value)
 
         danfe.set_cell((x, y), c)
@@ -277,14 +279,12 @@ class Odf(object):
               os.path.join(self.prefix, self.output.replace('.pdf', '.ods')) + \
               ' ' + \
               'pdfgen@10.25.18.5:'
-        print cmd
         os.system(cmd)
 
         cmd = 'ssh -i /etc/pdfgen.key ' + \
               'pdfgen@10.25.18.5 ' + \
               'unoconv ' + \
               self.output.replace('.pdf', '.ods')
-        print cmd
         os.system(cmd)
 
         cmd = 'scp -i /etc/pdfgen.key ' + \
@@ -292,7 +292,6 @@ class Odf(object):
               self.output + \
               ' ' + \
               os.path.join(self.prefix, self.output)
-        print cmd
         os.system(cmd)
         
         
