@@ -185,7 +185,6 @@ class Odf(object):
                                   n.text[32:36] + '.' +\
                                   n.text[36:40] + '.' +\
                                   n.text[40:]
-
                 else:
                     danfe_value = n.text
                 #print danfe_key
@@ -246,6 +245,14 @@ class Odf(object):
 
         danfe.set_cell_image((x, y), frame, type=self.danfe.get_type())
         danfe.get_frame_list()[1].set_attribute('table:end-cell-address', 'Paisagem.Z3')
+
+        # Put the canhoto
+        x, y, c = danfe.get_cells(content=u'danfe.xCanhoto')[0]
+        xnome = danfe.get_cells(content=u'%%emit.xNome%%')[0]
+        danfe_value = u'RECEBEMOS DE %s O(S) PRODUTO(S) CONSTANTE(S) DA NOTA FISCAL INDICADA AO LADO' % xnome[2]
+        c.set_value(danfe_value)
+
+        danfe.set_cell((x, y), c)
 
         # Clean the unused fields
         for x, y, c in danfe.get_cells(content=u'%%'):
