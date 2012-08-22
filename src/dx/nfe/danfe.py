@@ -207,7 +207,7 @@ class Odf(object):
                         c.set_value(danfe_value)
 
                     danfe.set_cell((x, y), c)
-                    if danfe_key.find('nNF') == -1 or danfe_key.find('serie') == -1:
+                    if danfe_key.find('ide.nNF') == -1 and danfe_key.find('ide.serie') == -1:
                         break
 
         # Put the logo
