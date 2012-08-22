@@ -208,7 +208,7 @@ class Odf(object):
 
                     danfe.set_cell((x, y), c)
                     #if danfe_key.find('prod') != -1 or danfe_key.find('ICMS') !=1:
-                    break
+                    #break
 
         # Put the logo
         x, y, c = danfe.get_cells(content=u'danfe.xLogo')[0]
