@@ -258,7 +258,8 @@ class Odf(object):
 
         # Clean the unused fields
         for x, y, c in danfe.get_cells(content=u'%%'):
-            regex = re.search('%%.*%%', c.get_value())
+            value = c.get_value()
+            regex = re.search('%%.*%%', value)
             c.set_value(c.get_value().replace(regex.group(0), u''))
             danfe.set_cell((x, y), c)
 
