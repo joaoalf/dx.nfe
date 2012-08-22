@@ -207,8 +207,8 @@ class Odf(object):
                         c.set_value(danfe_value)
 
                     danfe.set_cell((x, y), c)
-                    #if danfe_key.find('prod') != -1 or danfe_key.find('ICMS') !=1:
-                    #break
+                    if danfe_key.find('nNF') == -1 or danfe_key.find('serie') == -1:
+                        break
 
         # Put the logo
         x, y, c = danfe.get_cells(content=u'danfe.xLogo')[0]
@@ -258,9 +258,9 @@ class Odf(object):
 
         # Clean the unused fields
         for x, y, c in danfe.get_cells(content=u'%%'):
-            value = c.get_value()
+            value = c.get_value() or '%%None%%'
             regex = re.search('%%.*%%', value)
-            c.set_value(c.get_value().replace(regex.group(0), u''))
+            c.set_value(value.replace(regex.group(0), u''))
             danfe.set_cell((x, y), c)
 
 
