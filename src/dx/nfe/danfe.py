@@ -185,6 +185,12 @@ class Odf(object):
                                   n.text[32:36] + '.' +\
                                   n.text[36:40] + '.' +\
                                   n.text[40:]
+                elif danfe_key.find('modFrete'):
+                    if n.text == 0:
+                        danfe_value = "0 - EMITENTE"
+                    else:
+                        danfe_value = "1 - DESTINATARIO"
+
                 else:
                     danfe_value = n.text
                 #print danfe_key
