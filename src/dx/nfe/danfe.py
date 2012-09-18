@@ -190,7 +190,8 @@ class Odf(object):
                         danfe_value = "0 - EMITENTE"
                     elif n.text == '1':
                         danfe_value = "1 - DESTINATARIO"
-
+                elif danfe_key.find('dhRecbto') != -1:
+                    danfe_value = n.text[8:10] + '/' + n.text[5:7] + '/' + n.text[:4] + ' ' + n.text[11:]
                 else:
                     danfe_value = n.text
                 #print danfe_key
